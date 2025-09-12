@@ -1,2 +1,4 @@
-# design_patterns_university
+# Шаблоны проектирования (университет)
+
+- [Техническое задание](Docs/TechnicalTask.md)
 
