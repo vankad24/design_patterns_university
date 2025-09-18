@@ -60,6 +60,55 @@ class TestModels:
         assert manager.company == manager2.company
         assert initialized_company == manager.company
 
+def test_convert_creates_company_from_dict():
+    # Подготовка
+    data = {
+        "name": "ООО Ромашка",
+        "inn": "123456789012",
+        "account": "12345678901",
+        "corr_account": "10987654321",
+        "bik": "123456789",
+        "ownership": "ООО"
+    }
+    manager = SettingsManager()
+
+    # Действие
+    company = manager.convert(data)
+
+    # Проверки
+    assert company.name == data["name"]
+    assert company.inn == data["inn"]
+    assert company.account == data["account"]
+    assert company.corr_account == data["corr_account"]
+    assert company.bik == data["bik"]
+    assert company.ownership == data["ownership"]
+
+def test_convert_creates_company_from_dir():
+    # Подготовка
+    data = {
+        "name": "ООО Тестовая Ромашка",
+        "inn": "123456789012",
+        "account": "12345678901",
+        "corr_account": "10987654321",
+        "bik": "123456789",
+        "ownership": "ООО"
+  }
+    file_name = './test_company.json'
+    manager = SettingsManager()
+    manager.file_name = file_name
+
+    # Действие
+    manager.load()
+    company = manager.company
+
+    # Проверки
+    assert company.name == data["name"]
+    assert company.inn == data["inn"]
+    assert company.account == data["account"]
+    assert company.corr_account == data["corr_account"]
+    assert company.bik == data["bik"]
+    assert company.ownership == data["ownership"]
+
 
 if __name__ == "__main__":
     pytest.main(['-v'])
