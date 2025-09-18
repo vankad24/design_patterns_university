@@ -7,15 +7,18 @@ from src.models.company import CompanyModel
 # Менеджер настроек.
 # Предназначен для управления настройками и хранения параметров приложения
 class SettingsManager:
+    _instance = None
 
     # Singletone
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super().__new__(cls)
-        return cls.instance
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
-        self.set_default()
+        if not hasattr(self, "_initialized"):
+            self._initialized = True
+            self.set_default()
 
     # Параметры организации из настроек
     @property

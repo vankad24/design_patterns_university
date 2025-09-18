@@ -2,7 +2,6 @@ from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
 
 import pytest
-import json
 
 class TestModels:
 
@@ -53,6 +52,7 @@ class TestModels:
 
         # Действие
         manager.load()
+        manager2.load()
 
         # Проверки
         assert manager.company == manager2.company
