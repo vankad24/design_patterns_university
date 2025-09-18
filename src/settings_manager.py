@@ -2,25 +2,18 @@ import json
 import os.path
 
 from src.models.company import CompanyModel
+from src.utils.singletone import Singleton
+
 
 ####################################################3
 # Менеджер настроек.
 # Предназначен для управления настройками и хранения параметров приложения
-class SettingsManager:
+class SettingsManager(metaclass=Singleton):
     __file_name: str = ""
     __company: CompanyModel = None
-    _instance = None
-
-    # Singletone
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
 
     def __init__(self):
-        if not hasattr(self, "_initialized"):
-            self._initialized = True
-            self.set_default()
+        self.set_default()
 
     # Параметры организации из настроек
     @property
