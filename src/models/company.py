@@ -1,7 +1,10 @@
+###############################################
+# Модель организации
 class CompanyModel:
     __name: str = ""
     __inn: str = ""
 
+    # Наименование
     @property
     def name(self) -> str:
         return self.__name
