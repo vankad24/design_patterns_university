@@ -7,6 +7,8 @@ from src.models.company import CompanyModel
 # Менеджер настроек.
 # Предназначен для управления настройками и хранения параметров приложения
 class SettingsManager:
+    __file_name: str = ""
+    __company: CompanyModel = None
     _instance = None
 
     # Singletone
@@ -46,7 +48,7 @@ class SettingsManager:
         if self.__file_name.strip() == "":
             raise Exception("Не найден файл настроек!")
         try:
-            with open(self.__file_name.strip(), 'r') as file:
+            with open(self.__file_name.strip(), 'r', encoding='utf-8') as file:
                 data = json.load(file)
 
                 if "company" in data.keys():
@@ -61,5 +63,4 @@ class SettingsManager:
     # Параметры настроек по умолчанию
     def set_default(self):
         self.__company = CompanyModel()
-        self.__company.name = "Рога и копыта"
-        self.__file_name = ""
+        self.__company.name = "Копыта и рога"

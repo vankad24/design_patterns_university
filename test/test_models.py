@@ -40,6 +40,7 @@ class TestModels:
 
         # Проверки
         assert result == True
+        assert manager.company.name == 'Рога и копыта'
 
     # Проверить создание основной модели
     # Данные загружаем. Проверяем работу Singletone
@@ -48,6 +49,7 @@ class TestModels:
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
+        initialized_company = manager.company
         manager2 = SettingsManager()
 
         # Действие
@@ -56,6 +58,7 @@ class TestModels:
 
         # Проверки
         assert manager.company == manager2.company
+        assert initialized_company == manager.company
 
 
 if __name__ == "__main__":
