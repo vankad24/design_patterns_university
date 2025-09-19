@@ -1,3 +1,5 @@
+import os.path
+
 from src.models.utils import model_converter
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
@@ -33,6 +35,22 @@ class TestModels:
     def test_load_model_company_model(self):
         # Подготовка
         file_name = '../settings.json'
+        manager = SettingsManager()
+        manager.file_name = file_name
+
+        # Действие
+        result = manager.load()
+
+        # Проверки
+        assert result == True
+        assert manager.company.name == 'Рога и копыта'
+
+    # Проверить создание основной модели
+    # Данные загружаем через json настройки c абослютным путём
+    def test_load_model_company_model_abs(self):
+        # Подготовка
+        file_name = os.path.abspath('../settings.json')
+
         manager = SettingsManager()
         manager.file_name = file_name
 
