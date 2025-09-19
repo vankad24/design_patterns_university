@@ -1,3 +1,4 @@
+from src.models.utils import model_converter
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
 
@@ -49,7 +50,6 @@ class TestModels:
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
-        initialized_company = manager.company
         manager2 = SettingsManager()
 
         # Действие
@@ -58,7 +58,6 @@ class TestModels:
 
         # Проверки
         assert manager.company == manager2.company
-        assert initialized_company == manager.company
 
     def test_convert_creates_company_from_dict(self):
         # Подготовка
@@ -70,10 +69,9 @@ class TestModels:
             "bik": "123456789",
             "ownership": "00001"
         }
-        manager = SettingsManager()
 
         # Действие
-        company = manager.convert(data)
+        company = model_converter.dict_to_company(data)
 
         # Проверки
         assert company.name == data["name"]

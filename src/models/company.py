@@ -8,12 +8,13 @@ class CompanyModel:
     __bik: str = ""
     __ownership: str = ""
 
-    # --- Вспомогательный метод ---
-    def __validate_str(self, value: str, length: int, field: str) -> str:
-        value = value.strip()
-        if len(value) != length:
-            raise ValueError(f"{field} должен содержать ровно {length} символов")
-        return value
+    def __init__(self, name="", inn="", account="", corr_account="", bik="", ownership=""):
+        self.__name = name
+        self.__inn = inn
+        self.__account = account
+        self.__corr_account = corr_account
+        self.__bik = bik
+        self.__ownership = ownership
 
     # --- Наименование ---
     @property
@@ -22,53 +23,50 @@ class CompanyModel:
 
     @name.setter
     def name(self, value: str):
-        value = value.strip()
-        if not value:
-            raise ValueError("Наименование не может быть пустым")
         self.__name = value
 
-    # --- ИНН (12 символов) ---
+    # --- ИНН ---
     @property
     def inn(self) -> str:
         return self.__inn
 
     @inn.setter
     def inn(self, value: str):
-        self.__inn = self.__validate_str(value, 12, "ИНН")
+        self.__inn = value
 
-    # --- Счет (11 символов) ---
+    # --- Счет ---
     @property
     def account(self) -> str:
         return self.__account
 
     @account.setter
     def account(self, value: str):
-        self.__account = self.__validate_str(value, 11, "Счет")
+        self.__account = value
 
-    # --- Корреспондентский счет (11 символов) ---
+    # --- Корреспондентский счет ---
     @property
     def corr_account(self) -> str:
         return self.__corr_account
 
     @corr_account.setter
     def corr_account(self, value: str):
-        self.__corr_account = self.__validate_str(value, 11, "Корреспондентский счет")
+        self.__corr_account = value
 
-    # --- БИК (9 символов) ---
+    # --- БИК ---
     @property
     def bik(self) -> str:
         return self.__bik
 
     @bik.setter
     def bik(self, value: str):
-        self.__bik = self.__validate_str(value, 9, "БИК")
+        self.__bik = value
 
-    # --- Вид собственности (5 символов) ---
+    # --- Вид собственности ---
     @property
     def ownership(self) -> str:
         return self.__ownership
 
     @ownership.setter
     def ownership(self, value: str):
-        self.__ownership = self.__validate_str(value, 5, "Вид собственности")
+        self.__ownership = value
 

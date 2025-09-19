@@ -3,7 +3,7 @@ import os.path
 
 from src.models.company import CompanyModel
 from src.utils.singletone import Singleton
-
+from src.models.utils import model_converter, model_validators
 
 ####################################################
 # Менеджер настроек.
@@ -36,26 +36,6 @@ class SettingsManager(metaclass=Singleton):
         else:
             raise Exception(f"Не найден файл настроек: {path}")
 
-    # Конвертация словаря в объект CompanyModel
-    def convert(self, data: dict, to_company_obj=None) -> CompanyModel:
-        if to_company_obj is None:
-            company = CompanyModel()
-        else:
-            company = to_company_obj
-        if "name" in data:
-            company.name = data["name"]
-        if "inn" in data:
-            company.inn = data["inn"]
-        if "account" in data:
-            company.account = data["account"]
-        if "corr_account" in data:
-            company.corr_account = data["corr_account"]
-        if "bik" in data:
-            company.bik = data["bik"]
-        if "ownership" in data:
-            company.ownership = data["ownership"]
-        return company
-
     # Загрузить настройки из Json файла
     def load(self) -> bool:
         if self.__file_name.strip() == "":
@@ -65,7 +45,9 @@ class SettingsManager(metaclass=Singleton):
                 data = json.load(file)
 
                 if "company" in data:
-                    self.__company = self.convert(data["company"], self.__company)
+                    model_converter.dict_to_company(data["company"], self.__company)
+                    model_validators.validate_company(self.__company)
+
                     return True
                 return False
         except Exception as e:
@@ -73,5 +55,11 @@ class SettingsManager(metaclass=Singleton):
 
     # Параметры настроек по умолчанию
     def set_default(self):
-        self.__company = CompanyModel()
-        self.__company.name = "Копыта и рога"
+        self.__company = CompanyModel(
+            name="Копыта и рога",
+            inn="123456789012",
+            account="12345678901",
+            corr_account="10987654321",
+            bik="123456789",
+            ownership="00001"
+        )
