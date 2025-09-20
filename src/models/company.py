@@ -8,14 +8,6 @@ class CompanyModel:
     __bik: str = ""
     __ownership: str = ""
 
-    def __init__(self, name="", inn="", account="", corr_account="", bik="", ownership=""):
-        self.__name = name
-        self.__inn = inn
-        self.__account = account
-        self.__corr_account = corr_account
-        self.__bik = bik
-        self.__ownership = ownership
-
     # --- Наименование ---
     @property
     def name(self) -> str:
