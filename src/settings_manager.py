@@ -58,9 +58,9 @@ class SettingsManager(metaclass=Singleton):
     def set_default(self):
         c = CompanyModel()
         c.name="Копыта и рога"
-        c.inn="123456789012",
-        c.account="12345678901",
-        c.corr_account="10987654321",
-        c.bik="123456789",
+        c.inn="123456789012"
+        c.account="12345678901"
+        c.corr_account="10987654321"
+        c.bik="123456789"
         c.ownership="00001"
         self.__company = c

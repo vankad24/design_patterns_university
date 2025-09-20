@@ -1,3 +1,5 @@
+from src.models.utils.validators import validate_str
+
 ###############################################
 # Модель организации
 class CompanyModel:
@@ -15,7 +17,9 @@ class CompanyModel:
 
     @name.setter
     def name(self, value: str):
-        self.__name = value
+        if not value.strip():
+            raise ValueError("Наименование не может быть пустым")
+        self.__name = value.strip()
 
     # --- ИНН ---
     @property
@@ -24,7 +28,7 @@ class CompanyModel:
 
     @inn.setter
     def inn(self, value: str):
-        self.__inn = value
+        self.__inn = validate_str(value, 12, "ИНН", True)
 
     # --- Счет ---
     @property
@@ -33,7 +37,7 @@ class CompanyModel:
 
     @account.setter
     def account(self, value: str):
-        self.__account = value
+        self.__account = validate_str(value, 11, "Счет", True)
 
     # --- Корреспондентский счет ---
     @property
@@ -42,7 +46,7 @@ class CompanyModel:
 
     @corr_account.setter
     def corr_account(self, value: str):
-        self.__corr_account = value
+        self.__corr_account = validate_str(value, 11, "Корреспондентский счет", True)
 
     # --- БИК ---
     @property
@@ -51,7 +55,7 @@ class CompanyModel:
 
     @bik.setter
     def bik(self, value: str):
-        self.__bik = value
+        self.__bik = validate_str(value, 9, "БИК", True)
 
     # --- Вид собственности ---
     @property
@@ -60,5 +64,4 @@ class CompanyModel:
 
     @ownership.setter
     def ownership(self, value: str):
-        self.__ownership = value
-
+        self.__ownership = validate_str(value, 5, "Вид собственности")

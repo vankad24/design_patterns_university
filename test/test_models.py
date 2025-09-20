@@ -190,9 +190,9 @@ class TestModels:
         }
 
         data[field] = value
-        company = model_converter.dict_to_company(data)
 
         with pytest.raises(ValueError) as exc_info:
+            company = model_converter.dict_to_company(data)
             model_validators.validate_company(company)
         assert exc_info.value.args[0] == error_msg
 
