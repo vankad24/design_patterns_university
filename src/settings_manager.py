@@ -45,8 +45,9 @@ class SettingsManager(metaclass=Singleton):
                 data = json.load(file)
 
                 if "company" in data:
-                    model_converter.dict_to_company(data["company"], self.__company)
-                    model_validators.validate_company(self.__company)
+                    company = model_converter.dict_to_company(data["company"])
+                    model_validators.validate_company(company)
+                    self.__company = company
 
                     return True
                 return False
