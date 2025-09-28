@@ -1,6 +1,7 @@
 import os.path
 import uuid
 
+from src.models.storage import StorageModel
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
@@ -180,6 +181,19 @@ class TestModels:
         assert isinstance(caused_exc, ArgumentException)
         assert error_msg in caused_exc.args[0]
 
+
+    def test_equals_storage_models_create(self):
+        # Подготовка
+        myid = uuid.uuid4().hex
+        storage1 = StorageModel()
+        storage2 = StorageModel()
+        storage1.id = myid
+        storage2.id = myid
+
+        # Действие
+
+        # Проверки
+        assert storage1 == storage2
 
 
 
