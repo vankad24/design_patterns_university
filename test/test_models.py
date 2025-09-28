@@ -1,6 +1,7 @@
 import os.path
+import uuid
 
-from src.models.utils import model_converter, model_validators
+from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
 
@@ -32,7 +33,7 @@ class TestModels:
 
     # Проверить создание основной модели
     # Данные загружаем через json настройки
-    def test_load_model_company_model(self):
+    def test_load_company_model(self):
         # Подготовка
         file_name = '../settings.json'
         manager = SettingsManager()
@@ -43,11 +44,11 @@ class TestModels:
 
         # Проверки
         assert result == True
-        assert manager.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'Рога и копыта'
 
     # Проверить создание основной модели
     # Данные загружаем через json настройки c абослютным путём
-    def test_load_model_company_model_abs(self):
+    def test_load_company_model_abs_path(self):
         # Подготовка
         file_name = os.path.abspath('../settings.json')
 
@@ -59,7 +60,7 @@ class TestModels:
 
         # Проверки
         assert result == True
-        assert manager.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'Рога и копыта'
 
     # Проверить создание основной модели
     # Данные загружаем. Проверяем работу Singletone
@@ -75,10 +76,10 @@ class TestModels:
         manager2.load()
 
         # Проверки
-        assert manager.company == manager2.company
+        assert manager.settings.company == manager2.settings.company
 
-    # Проверка создания CompanyModel из словаря
-    def test_convert_creates_company_from_dict(self):
+    # Проверка загрузки данных в CompanyModel из словаря
+    def test_load_from_dict_company(self):
         # Подготовка
         data = {
             "name": "ООО Ромашка",
@@ -88,9 +89,10 @@ class TestModels:
             "bik": "123456789",
             "ownership": "00001"
         }
+        company = CompanyModel()
 
         # Действие
-        company = model_converter.dict_to_company(data)
+        company.load_from_dict(data)
 
         # Проверки
         assert company.name == data["name"]
@@ -101,7 +103,7 @@ class TestModels:
         assert company.ownership == data["ownership"]
 
     # Проверка создания CompanyModel при загрузке из json файла
-    def test_convert_creates_company_from_dir(self):
+    def test_load_from_dict_company_from_dir(self):
         # Подготовка
         data = {
             "name": "ООО Тестовая Ромашка",
@@ -117,7 +119,7 @@ class TestModels:
 
         # Действие
         manager.load()
-        company = manager.company
+        company = manager.settings.company
 
         # Проверки
         assert company.name == data["name"]
@@ -129,67 +131,56 @@ class TestModels:
 
     # Проверка обработки ошибок при некорректной конвертации CompanyModel
     # при неправильном параметре data:dict
-    def test_exception_convert_dict_to_company_wrong_dict(self):
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(None)
-        assert exc_info.value.args[0] == "Для конвертации нужен словарь"
+    def test_load_from_dict_exception_wrong_arg(self):
+        company = CompanyModel()
+        with pytest.raises(ArgumentException) as exc_info:
+            company.load_from_dict(None)
+        assert exc_info.value.args[0] == "Пустой аргумент"
 
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(["name"])
-        assert exc_info.value.args[0] == "Для конвертации нужен словарь"
-
-    # Проверка обработки ошибок при некорректной конвертации CompanyModel
-    # при отсутствии обязательных ключей в словаре
-    @pytest.mark.parametrize("missing_key", ["name", "inn", "account", "corr_account", "bik", "ownership"])
-    def test_exception_convert_dict_to_company_missing_key(self, missing_key):
-        data = {
-            "name": "ООО Ромашка",
-            "inn": "123456789012",
-            "account": "12345678901",
-            "corr_account": "10987654321",
-            "bik": "123456789",
-            "ownership": "00001"
-        }
-        data.pop(missing_key)
-
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(data)
-        assert exc_info.value.args[0] == f"В словаре нет обязательного значения '{missing_key}'"
+        with pytest.raises(ArgumentException) as exc_info:
+            company.load_from_dict(["name"])
+        assert exc_info.value.args[0].startswith("Некорректный тип")
 
     @pytest.mark.parametrize(
         "field, value, error_msg",
         [
-            ("name", "   ", "Наименование не может быть пустым"),
-            ("inn", "123", "ИНН должен содержать ровно 12 символов"),
-            ("inn", "123456789012435", "ИНН должен содержать ровно 12 символов"),
-            ("inn", "12345678901a", "ИНН должен содержать только цифры"),
-            ("account", "123", "Счет должен содержать ровно 11 символов"),
-            ("account", "1234567890a", "Счет должен содержать только цифры"),
-            ("corr_account", "123", "Корреспондентский счет должен содержать ровно 11 символов"),
-            ("corr_account", "1234567890a", "Корреспондентский счет должен содержать только цифры"),
-            ("bik", "123", "БИК должен содержать ровно 9 символов"),
-            ("bik", "12345678a", "БИК должен содержать только цифры"),
-            ("ownership", "1234", "Вид собственности должен содержать ровно 5 символов"),
-            ("ownership", "abda", "Вид собственности должен содержать ровно 5 символов"),
-            ("ownership", "1234a234ds", "Вид собственности должен содержать ровно 5 символов"),
+            ("name", "   ", "не прошёл проверку проверочной функцией"),
+            ("inn", "123", "Некорректная длина аргумента"),
+            ("inn", "123456789012435", "Некорректная длина аргумента"),
+            ("inn", "12345678901a", "не прошёл проверку проверочной функцией"),
+            ("account", "123", "Некорректная длина аргумента"),
+            ("account", "1234567890a", "не прошёл проверку проверочной функцией"),
+            ("corr_account", "123", "Некорректная длина аргумента"),
+            ("corr_account", "1234567890a", "не прошёл проверку проверочной функцией"),
+            ("bik", "123", "Некорректная длина аргумента"),
+            ("bik", "12345678a", "не прошёл проверку проверочной функцией"),
+            ("ownership", "1234", "Некорректная длина аргумента"),
+            ("ownership", "abda", "Некорректная длина аргумента"),
+            ("ownership", "1234a234ds", "Некорректная длина аргумента"),
         ]
     )
-    def test_validate_company_fields(self, field, value, error_msg):
+    def test_load_from_dict_exception_incorrect_fields(self, field, value, error_msg):
         data = {
             "name": "ООО Ромашка",
             "inn": "123456789012",
             "account": "12345678901",
             "corr_account": "10987654321",
             "bik": "123456789",
-            "ownership": "00001"
+            "ownership": "00001",
+            field: value
         }
 
-        data[field] = value
+        company = CompanyModel()
 
-        with pytest.raises(ValueError) as exc_info:
-            company = model_converter.dict_to_company(data)
-            model_validators.validate_company(company)
-        assert exc_info.value.args[0] == error_msg
+        with pytest.raises(RuntimeError) as exc_info:
+            company.load_from_dict(data)
+
+        assert exc_info.value.args[0] == f"Setter '{field}' не выполнился"
+        caused_exc = exc_info.value.__cause__
+        assert isinstance(caused_exc, ArgumentException)
+        assert error_msg in caused_exc.args[0]
+
+
 
 
 if __name__ == "__main__":
