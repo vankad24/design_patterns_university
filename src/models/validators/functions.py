@@ -42,4 +42,4 @@ def validate_val(value, check_type, check_len=None, check_func=None):
 
     # Проверка через пользовательскую функцию
     if check_func is not None and not check_func(value):
-        raise ArgumentException(f"Аргумент {value} не прошёл проверку проверочной функцией")
+        raise ArgumentException(f"Аргумент со значением `{value}` не прошёл проверку проверочной функцией")

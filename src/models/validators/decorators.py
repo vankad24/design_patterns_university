@@ -1,6 +1,6 @@
 def validate_setter(check_type, check_len=None, check_func=None):
-    def decorator(setter):
-        setter_name = setter.__name__
+    def decorator(setter_func):
+        setter_name = setter_func.__name__
 
         def wrapper(self, value):
             try:
@@ -8,7 +8,7 @@ def validate_setter(check_type, check_len=None, check_func=None):
                 validate_val(value, check_type, check_len, check_func)
             except Exception as e:
                 raise RuntimeError(f"Setter '{setter_name}' не выполнился") from e
-            setter(self, value)
+            setter_func(self, value)
 
         return wrapper
     return decorator
