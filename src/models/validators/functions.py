@@ -1,14 +1,6 @@
 from src.models.validators.exceptions import ArgumentException
 
 
-def validate_str(value: str, length: int, field: str, digits_only: bool = False) -> str:
-    value = value.strip()
-    if len(value) != length:
-        raise ValueError(f"{field} должен содержать ровно {length} символов")
-    if digits_only and not value.isdigit():
-        raise ValueError(f"{field} должен содержать только цифры")
-    return value
-
 def validate_val(value, check_type, check_len=None, check_func=None):
     """
     Проверяет значение на корректность.
@@ -43,3 +35,7 @@ def validate_val(value, check_type, check_len=None, check_func=None):
     # Проверка через пользовательскую функцию
     if check_func is not None and not check_func(value):
         raise ArgumentException(f"Аргумент со значением `{value}` не прошёл проверку проверочной функцией")
+
+
+def not_empty(s: str):
+    return len(s.strip()) > 0
