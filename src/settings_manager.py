@@ -3,7 +3,6 @@ import os.path
 
 from src.models.company import CompanyModel
 from src.models.settings import SettingsModel
-from src.models.validators.functions import validate_val
 from src.core.singletone import Singleton
 
 ####################################################

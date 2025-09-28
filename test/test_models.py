@@ -12,21 +12,26 @@ from src.models.company import CompanyModel
 import pytest
 
 class TestModels:
+    """
+    Класс с тестами для моделей
+    """
 
-    # Проверка создания основной модели
-    # Данные после создания должны быть пустыми
     def test_create_model_empty_company_model(self):
-        # Подготовка
+        """
+        Проверяет создание CompanyModel без установки данных.
+        После создания все поля должны быть пустыми.
+        """
         model = CompanyModel()
         # Действие
 
         # Проверки
         assert model.name == ""
 
-    # Проверка создания основной модели
-    # Данные после создания не должны быть пустыми
     def test_create_model_not_empty_company_model(self):
-        # Подготовка
+        """
+        Проверяет создание CompanyModel с последующей установкой данных.
+        После установки поле name не должно быть пустым.
+        """
         model = CompanyModel()
 
         # Действие
@@ -35,10 +40,11 @@ class TestModels:
         # Проверки
         assert model.name != ""
 
-    # Проверить создание основной модели
-    # Данные загружаем через json настройки
     def test_load_company_model(self):
-        # Подготовка
+        """
+        Проверяет загрузку данных CompanyModel из JSON файла через SettingsManager.
+        Проверяется корректность имени компании после загрузки.
+        """
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
@@ -50,12 +56,11 @@ class TestModels:
         assert result == True
         assert manager.settings.company.name == 'Рога и копыта'
 
-    # Проверить создание основной модели
-    # Данные загружаем через json настройки c абослютным путём
     def test_load_company_model_abs_path(self):
-        # Подготовка
+        """
+        Проверяет загрузку данных CompanyModel из JSON файла по абсолютному пути.
+        """
         file_name = os.path.abspath('../settings.json')
-
         manager = SettingsManager()
         manager.file_name = file_name
 
@@ -66,10 +71,11 @@ class TestModels:
         assert result == True
         assert manager.settings.company.name == 'Рога и копыта'
 
-    # Проверить создание основной модели
-    # Данные загружаем. Проверяем работу Singletone
     def test_load_model_company_model_from_same_file(self):
-        # Подготовка
+        """
+        Проверяет работу Singleton при загрузке CompanyModel из одного и того же файла.
+        Ожидается, что два менеджера будут использовать один и тот же объект company.
+        """
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
@@ -82,9 +88,11 @@ class TestModels:
         # Проверки
         assert manager.settings.company == manager2.settings.company
 
-    # Проверка загрузки данных в CompanyModel из словаря
     def test_load_from_dict_company(self):
-        # Подготовка
+        """
+        Проверяет загрузку данных в CompanyModel из словаря.
+        Все поля должны быть установлены согласно словарю.
+        """
         data = {
             "name": "ООО Ромашка",
             "inn": "123456789012",
@@ -106,9 +114,11 @@ class TestModels:
         assert company.bik == data["bik"]
         assert company.ownership == data["ownership"]
 
-    # Проверка создания CompanyModel при загрузке из json файла
     def test_load_from_dict_company_from_dir(self):
-        # Подготовка
+        """
+        Проверяет загрузку CompanyModel из JSON файла, расположенного в тестовой директории.
+        Проверяется корректность всех полей компании после загрузки.
+        """
         data = {
             "name": "ООО Тестовая Ромашка",
             "inn": "123456789012",
@@ -116,7 +126,7 @@ class TestModels:
             "corr_account": "10987654321",
             "bik": "123456789",
             "ownership": "00002"
-      }
+        }
         file_name = './test_company.json'
         manager = SettingsManager()
         manager.file_name = file_name
@@ -133,9 +143,11 @@ class TestModels:
         assert company.bik == data["bik"]
         assert company.ownership == data["ownership"]
 
-    # Проверка обработки ошибок при некорректной конвертации CompanyModel
-    # при неправильном параметре data:dict
     def test_load_from_dict_exception_wrong_arg(self):
+        """
+        Проверяет обработку ошибок при загрузке CompanyModel из некорректного аргумента.
+        Ожидается выброс ArgumentException при None или неправильном типе данных.
+        """
         company = CompanyModel()
         with pytest.raises(ArgumentException) as exc_info:
             company.load_from_dict(None)
@@ -145,6 +157,7 @@ class TestModels:
             company.load_from_dict(["name"])
         assert exc_info.value.args[0].startswith("Некорректный тип")
 
+    # Параметры для тестирования некорректных значений полей компании
     @pytest.mark.parametrize(
         "field, value, error_msg",
         [
@@ -164,6 +177,10 @@ class TestModels:
         ]
     )
     def test_load_from_dict_exception_incorrect_fields(self, field, value, error_msg):
+        """
+        Тестирует загрузку данных в CompanyModel с некорректными значениями полей.
+        Проверяет, что при неверных данных выбрасывается RuntimeError с правильной причиной.
+        """
         data = {
             "name": "ООО Ромашка",
             "inn": "123456789012",
@@ -184,30 +201,31 @@ class TestModels:
         assert isinstance(caused_exc, ArgumentException)
         assert error_msg in caused_exc.args[0]
 
-
     def test_equals_storage_models_creation(self):
-        # Подготовка
+        """
+        Проверяет, что два StorageModel с одинаковым id считаются равными.
+        """
         myid = uuid.uuid4().hex
         storage1 = StorageModel()
         storage2 = StorageModel()
         storage1.id = myid
         storage2.id = myid
 
-        # Действие
-
-        # Проверки
         assert storage1 == storage2
 
     def test_not_equals_storage_models_creation(self):
-        # Подготовка
+        """
+        Проверяет, что два StorageModel с разными id считаются не равными.
+        """
         storage1 = StorageModel()
         storage2 = StorageModel()
-        # Действие
 
-        # Проверки
         assert storage1 != storage2
 
     def test_storage_model_creation(self):
+        """
+        Проверяет создание StorageModel и корректность установки атрибутов.
+        """
         storage = StorageModel()
         storage.name = "Основной склад"
         storage.address = "г. Москва, ул. Ленина, 1"
@@ -215,36 +233,40 @@ class TestModels:
         assert storage.name == "Основной склад"
         assert storage.address == "г. Москва, ул. Ленина, 1"
 
-
     def test_measurement_unit_creation(self):
-        # Подготовка
+        """
+        Проверяет создание единиц измерения и правильность установки базовой единицы.
+        """
         gram = MeasurementUnitModel("грамм", 1.0)
         kg = MeasurementUnitModel("кг", 1000.0, gram)
 
-        # Проверки
         assert gram.base_unit == gram
         assert kg.base_unit == gram
 
     def test_convert_measurement_unit_chain_conversion(self):
-        # Подготовка
-        gram = MeasurementUnitModel("грамм", 1.0)  # базовая единица
-        kg = MeasurementUnitModel("кг", 1000.0, gram)  # 1 кг = 1000 г
-        ton = MeasurementUnitModel("т", 1000.0, kg)  # 1 т = 1000 кг
+        """
+        Проверяет корректность цепочки конверсий между единицами измерения.
+        """
+        gram = MeasurementUnitModel("грамм", 1.0)
+        kg = MeasurementUnitModel("кг", 1000.0, gram)
+        ton = MeasurementUnitModel("т", 1000.0, kg)
 
-        # Проверки
         assert ton.convert_to(2, gram) == 2_000_000
         assert kg.convert_to(5, gram) == 5000
         assert ton.convert_to(1, kg) == 1000
         assert kg.convert_to(5, kg) == 5
         assert gram.convert_to(2, gram) == 2
 
-
     def test_product_group_and_product_creation(self):
+        """
+        Проверяет создание ProductGroupModel и ProductModel,
+        включая корректную установку всех атрибутов.
+        """
         group = ProductGroupModel()
         group.name = "Молочные продукты"
 
-        long_name = "a"*50
-        long_full_name = "a"*255
+        long_name = "a" * 50
+        long_full_name = "a" * 255
 
         unit = MeasurementUnitModel("шт", 1.0)
         product = ProductModel()
@@ -263,6 +285,9 @@ class TestModels:
         assert product.price == 75.5
 
     def test_setter_product_model_exception_too_long_string(self):
+        """
+        Проверяет, что при установке слишком длинных строк в ProductModel выбрасывается RuntimeError.
+        """
         product = ProductModel()
         long_name = "a" * 51
         long_full_name = "a" * 256

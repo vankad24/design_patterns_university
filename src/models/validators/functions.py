@@ -38,4 +38,7 @@ def validate_val(value, check_type, check_len=None, check_func=None):
 
 
 def not_empty(s: str):
+    """
+        Возвращает, пустая ли строка без учёта пробелов
+    """
     return len(s.strip()) > 0
