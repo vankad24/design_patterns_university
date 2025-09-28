@@ -6,7 +6,10 @@ from src.models.validators.functions import validate_val
 
 
 class AbstractModel(ABC):
-    __id: str = uuid.uuid4().hex
+    __id: str = ""
+
+    def __init__(self):
+        self.__id = uuid.uuid4().hex
 
     def load_from_dict(self, data: dict):
         validate_val(data, dict)
