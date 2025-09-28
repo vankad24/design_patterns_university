@@ -1,13 +1,22 @@
-from src.models.utils.validators import validate_str
+from src.models.abstract_model import AbstractModel
+from src.models.validators.decorators import validate_setter
+from src.models.validators.functions import not_empty
+
 
 ###############################################
 # Модель организации
-class CompanyModel:
+class CompanyModel(AbstractModel):
+    # Наименование организации
     __name: str = ""
+    # Идентификационный номер налогоплательщика (ИНН)
     __inn: str = ""
+    # Расчетный счет организации
     __account: str = ""
+    # Корреспондентский счет банка организации
     __corr_account: str = ""
+    # Банк идентификационный код (БИК)
     __bik: str = ""
+    # Вид собственности организации
     __ownership: str = ""
 
     # --- Наименование ---
@@ -16,9 +25,8 @@ class CompanyModel:
         return self.__name
 
     @name.setter
+    @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
-        if not value.strip():
-            raise ValueError("Наименование не может быть пустым")
         self.__name = value.strip()
 
     # --- ИНН ---
@@ -27,8 +35,9 @@ class CompanyModel:
         return self.__inn
 
     @inn.setter
+    @validate_setter(str, 12, check_func=str.isdigit)
     def inn(self, value: str):
-        self.__inn = validate_str(value, 12, "ИНН", True)
+        self.__inn = value
 
     # --- Счет ---
     @property
@@ -36,8 +45,9 @@ class CompanyModel:
         return self.__account
 
     @account.setter
+    @validate_setter(str, 11, check_func=str.isdigit)
     def account(self, value: str):
-        self.__account = validate_str(value, 11, "Счет", True)
+        self.__account = value
 
     # --- Корреспондентский счет ---
     @property
@@ -45,8 +55,9 @@ class CompanyModel:
         return self.__corr_account
 
     @corr_account.setter
+    @validate_setter(str, 11, check_func=str.isdigit)
     def corr_account(self, value: str):
-        self.__corr_account = validate_str(value, 11, "Корреспондентский счет", True)
+        self.__corr_account = value
 
     # --- БИК ---
     @property
@@ -54,8 +65,9 @@ class CompanyModel:
         return self.__bik
 
     @bik.setter
+    @validate_setter(str, 9, check_func=str.isdigit)
     def bik(self, value: str):
-        self.__bik = validate_str(value, 9, "БИК", True)
+        self.__bik = value
 
     # --- Вид собственности ---
     @property
@@ -63,5 +75,6 @@ class CompanyModel:
         return self.__ownership
 
     @ownership.setter
+    @validate_setter(str, 5)
     def ownership(self, value: str):
-        self.__ownership = validate_str(value, 5, "Вид собственности")
+        self.__ownership = value

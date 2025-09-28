@@ -1,27 +1,37 @@
 import os.path
+import uuid
 
-from src.models.utils import model_converter, model_validators
+from src.models.measurement_unit import MeasurementUnitModel
+from src.models.product import ProductModel
+from src.models.product_group import ProductGroupModel
+from src.models.storage import StorageModel
+from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
 
 import pytest
 
 class TestModels:
+    """
+    Класс с тестами для моделей
+    """
 
-    # Проверка создания основной модели
-    # Данные после создания должны быть пустыми
     def test_create_model_empty_company_model(self):
-        # Подготовка
+        """
+        Проверяет создание CompanyModel без установки данных.
+        После создания все поля должны быть пустыми.
+        """
         model = CompanyModel()
         # Действие
 
         # Проверки
         assert model.name == ""
 
-    # Проверка создания основной модели
-    # Данные после создания не должны быть пустыми
     def test_create_model_not_empty_company_model(self):
-        # Подготовка
+        """
+        Проверяет создание CompanyModel с последующей установкой данных.
+        После установки поле name не должно быть пустым.
+        """
         model = CompanyModel()
 
         # Действие
@@ -30,10 +40,11 @@ class TestModels:
         # Проверки
         assert model.name != ""
 
-    # Проверить создание основной модели
-    # Данные загружаем через json настройки
-    def test_load_model_company_model(self):
-        # Подготовка
+    def test_load_company_model(self):
+        """
+        Проверяет загрузку данных CompanyModel из JSON файла через SettingsManager.
+        Проверяется корректность имени компании после загрузки.
+        """
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
@@ -43,14 +54,13 @@ class TestModels:
 
         # Проверки
         assert result == True
-        assert manager.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'Рога и копыта'
 
-    # Проверить создание основной модели
-    # Данные загружаем через json настройки c абослютным путём
-    def test_load_model_company_model_abs(self):
-        # Подготовка
+    def test_load_company_model_abs_path(self):
+        """
+        Проверяет загрузку данных CompanyModel из JSON файла по абсолютному пути.
+        """
         file_name = os.path.abspath('../settings.json')
-
         manager = SettingsManager()
         manager.file_name = file_name
 
@@ -59,12 +69,13 @@ class TestModels:
 
         # Проверки
         assert result == True
-        assert manager.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'Рога и копыта'
 
-    # Проверить создание основной модели
-    # Данные загружаем. Проверяем работу Singletone
     def test_load_model_company_model_from_same_file(self):
-        # Подготовка
+        """
+        Проверяет работу Singleton при загрузке CompanyModel из одного и того же файла.
+        Ожидается, что два менеджера будут использовать один и тот же объект company.
+        """
         file_name = '../settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
@@ -75,11 +86,13 @@ class TestModels:
         manager2.load()
 
         # Проверки
-        assert manager.company == manager2.company
+        assert manager.settings.company == manager2.settings.company
 
-    # Проверка создания CompanyModel из словаря
-    def test_convert_creates_company_from_dict(self):
-        # Подготовка
+    def test_load_from_dict_company(self):
+        """
+        Проверяет загрузку данных в CompanyModel из словаря.
+        Все поля должны быть установлены согласно словарю.
+        """
         data = {
             "name": "ООО Ромашка",
             "inn": "123456789012",
@@ -88,9 +101,10 @@ class TestModels:
             "bik": "123456789",
             "ownership": "00001"
         }
+        company = CompanyModel()
 
         # Действие
-        company = model_converter.dict_to_company(data)
+        company.load_from_dict(data)
 
         # Проверки
         assert company.name == data["name"]
@@ -100,9 +114,11 @@ class TestModels:
         assert company.bik == data["bik"]
         assert company.ownership == data["ownership"]
 
-    # Проверка создания CompanyModel при загрузке из json файла
-    def test_convert_creates_company_from_dir(self):
-        # Подготовка
+    def test_load_from_dict_company_from_dir(self):
+        """
+        Проверяет загрузку CompanyModel из JSON файла, расположенного в тестовой директории.
+        Проверяется корректность всех полей компании после загрузки.
+        """
         data = {
             "name": "ООО Тестовая Ромашка",
             "inn": "123456789012",
@@ -110,14 +126,14 @@ class TestModels:
             "corr_account": "10987654321",
             "bik": "123456789",
             "ownership": "00002"
-      }
+        }
         file_name = './test_company.json'
         manager = SettingsManager()
         manager.file_name = file_name
 
         # Действие
         manager.load()
-        company = manager.company
+        company = manager.settings.company
 
         # Проверки
         assert company.name == data["name"]
@@ -127,69 +143,160 @@ class TestModels:
         assert company.bik == data["bik"]
         assert company.ownership == data["ownership"]
 
-    # Проверка обработки ошибок при некорректной конвертации CompanyModel
-    # при неправильном параметре data:dict
-    def test_exception_convert_dict_to_company_wrong_dict(self):
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(None)
-        assert exc_info.value.args[0] == "Для конвертации нужен словарь"
+    def test_load_from_dict_exception_wrong_arg(self):
+        """
+        Проверяет обработку ошибок при загрузке CompanyModel из некорректного аргумента.
+        Ожидается выброс ArgumentException при None или неправильном типе данных.
+        """
+        company = CompanyModel()
+        with pytest.raises(ArgumentException) as exc_info:
+            company.load_from_dict(None)
+        assert exc_info.value.args[0] == "Пустой аргумент"
 
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(["name"])
-        assert exc_info.value.args[0] == "Для конвертации нужен словарь"
+        with pytest.raises(ArgumentException) as exc_info:
+            company.load_from_dict(["name"])
+        assert exc_info.value.args[0].startswith("Некорректный тип")
 
-    # Проверка обработки ошибок при некорректной конвертации CompanyModel
-    # при отсутствии обязательных ключей в словаре
-    @pytest.mark.parametrize("missing_key", ["name", "inn", "account", "corr_account", "bik", "ownership"])
-    def test_exception_convert_dict_to_company_missing_key(self, missing_key):
-        data = {
-            "name": "ООО Ромашка",
-            "inn": "123456789012",
-            "account": "12345678901",
-            "corr_account": "10987654321",
-            "bik": "123456789",
-            "ownership": "00001"
-        }
-        data.pop(missing_key)
-
-        with pytest.raises(ValueError) as exc_info:
-            model_converter.dict_to_company(data)
-        assert exc_info.value.args[0] == f"В словаре нет обязательного значения '{missing_key}'"
-
+    # Параметры для тестирования некорректных значений полей компании
     @pytest.mark.parametrize(
         "field, value, error_msg",
         [
-            ("name", "   ", "Наименование не может быть пустым"),
-            ("inn", "123", "ИНН должен содержать ровно 12 символов"),
-            ("inn", "123456789012435", "ИНН должен содержать ровно 12 символов"),
-            ("inn", "12345678901a", "ИНН должен содержать только цифры"),
-            ("account", "123", "Счет должен содержать ровно 11 символов"),
-            ("account", "1234567890a", "Счет должен содержать только цифры"),
-            ("corr_account", "123", "Корреспондентский счет должен содержать ровно 11 символов"),
-            ("corr_account", "1234567890a", "Корреспондентский счет должен содержать только цифры"),
-            ("bik", "123", "БИК должен содержать ровно 9 символов"),
-            ("bik", "12345678a", "БИК должен содержать только цифры"),
-            ("ownership", "1234", "Вид собственности должен содержать ровно 5 символов"),
-            ("ownership", "abda", "Вид собственности должен содержать ровно 5 символов"),
-            ("ownership", "1234a234ds", "Вид собственности должен содержать ровно 5 символов"),
+            ("name", "   ", "не прошёл проверку проверочной функцией"),
+            ("inn", "123", "Некорректная длина аргумента"),
+            ("inn", "123456789012435", "Некорректная длина аргумента"),
+            ("inn", "12345678901a", "не прошёл проверку проверочной функцией"),
+            ("account", "123", "Некорректная длина аргумента"),
+            ("account", "1234567890a", "не прошёл проверку проверочной функцией"),
+            ("corr_account", "123", "Некорректная длина аргумента"),
+            ("corr_account", "1234567890a", "не прошёл проверку проверочной функцией"),
+            ("bik", "123", "Некорректная длина аргумента"),
+            ("bik", "12345678a", "не прошёл проверку проверочной функцией"),
+            ("ownership", "1234", "Некорректная длина аргумента"),
+            ("ownership", "abda", "Некорректная длина аргумента"),
+            ("ownership", "1234a234ds", "Некорректная длина аргумента"),
         ]
     )
-    def test_validate_company_fields(self, field, value, error_msg):
+    def test_load_from_dict_exception_incorrect_fields(self, field, value, error_msg):
+        """
+        Тестирует загрузку данных в CompanyModel с некорректными значениями полей.
+        Проверяет, что при неверных данных выбрасывается RuntimeError с правильной причиной.
+        """
         data = {
             "name": "ООО Ромашка",
             "inn": "123456789012",
             "account": "12345678901",
             "corr_account": "10987654321",
             "bik": "123456789",
-            "ownership": "00001"
+            "ownership": "00001",
+            field: value
         }
 
-        data[field] = value
+        company = CompanyModel()
 
-        with pytest.raises(ValueError) as exc_info:
-            company = model_converter.dict_to_company(data)
-            model_validators.validate_company(company)
-        assert exc_info.value.args[0] == error_msg
+        with pytest.raises(RuntimeError) as exc_info:
+            company.load_from_dict(data)
+
+        assert exc_info.value.args[0] == f"Setter '{field}' не выполнился"
+        caused_exc = exc_info.value.__cause__
+        assert isinstance(caused_exc, ArgumentException)
+        assert error_msg in caused_exc.args[0]
+
+    def test_equals_storage_models_creation(self):
+        """
+        Проверяет, что два StorageModel с одинаковым id считаются равными.
+        """
+        myid = uuid.uuid4().hex
+        storage1 = StorageModel()
+        storage2 = StorageModel()
+        storage1.id = myid
+        storage2.id = myid
+
+        assert storage1 == storage2
+
+    def test_not_equals_storage_models_creation(self):
+        """
+        Проверяет, что два StorageModel с разными id считаются не равными.
+        """
+        storage1 = StorageModel()
+        storage2 = StorageModel()
+
+        assert storage1 != storage2
+
+    def test_storage_model_creation(self):
+        """
+        Проверяет создание StorageModel и корректность установки атрибутов.
+        """
+        storage = StorageModel()
+        storage.name = "Основной склад"
+        storage.address = "г. Москва, ул. Ленина, 1"
+
+        assert storage.name == "Основной склад"
+        assert storage.address == "г. Москва, ул. Ленина, 1"
+
+    def test_measurement_unit_creation(self):
+        """
+        Проверяет создание единиц измерения и правильность установки базовой единицы.
+        """
+        gram = MeasurementUnitModel("грамм", 1.0)
+        kg = MeasurementUnitModel("кг", 1000.0, gram)
+
+        assert gram.base_unit == gram
+        assert kg.base_unit == gram
+
+    def test_convert_measurement_unit_chain_conversion(self):
+        """
+        Проверяет корректность цепочки конверсий между единицами измерения.
+        """
+        gram = MeasurementUnitModel("грамм", 1.0)
+        kg = MeasurementUnitModel("кг", 1000.0, gram)
+        ton = MeasurementUnitModel("т", 1000.0, kg)
+
+        assert ton.convert_to(2, gram) == 2_000_000
+        assert kg.convert_to(5, gram) == 5000
+        assert ton.convert_to(1, kg) == 1000
+        assert kg.convert_to(5, kg) == 5
+        assert gram.convert_to(2, gram) == 2
+
+    def test_product_group_and_product_creation(self):
+        """
+        Проверяет создание ProductGroupModel и ProductModel,
+        включая корректную установку всех атрибутов.
+        """
+        group = ProductGroupModel()
+        group.name = "Молочные продукты"
+
+        long_name = "a" * 50
+        long_full_name = "a" * 255
+
+        unit = MeasurementUnitModel("шт", 1.0)
+        product = ProductModel()
+        product.code = "P001"
+        product.name = long_name
+        product.full_name = long_full_name
+        product.unit = unit
+        product.group = group
+        product.price = 75.5
+
+        assert product.code == "P001"
+        assert product.name == long_name
+        assert product.full_name == long_full_name
+        assert product.unit == unit
+        assert product.group == group
+        assert product.price == 75.5
+
+    def test_setter_product_model_exception_too_long_string(self):
+        """
+        Проверяет, что при установке слишком длинных строк в ProductModel выбрасывается RuntimeError.
+        """
+        product = ProductModel()
+        long_name = "a" * 51
+        long_full_name = "a" * 256
+
+        with pytest.raises(RuntimeError) as exc_info:
+            product.name = long_name
+
+        with pytest.raises(RuntimeError) as exc_info:
+            product.full_name = long_full_name
 
 
 if __name__ == "__main__":

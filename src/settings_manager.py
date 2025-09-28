@@ -2,23 +2,22 @@ import json
 import os.path
 
 from src.models.company import CompanyModel
-from src.utils.singletone import Singleton
-from src.models.utils import model_converter, model_validators
+from src.models.settings import SettingsModel
+from src.core.singletone import Singleton
 
 ####################################################
 # Менеджер настроек.
 # Предназначен для управления настройками и хранения параметров приложения
 class SettingsManager(metaclass=Singleton):
     __file_name: str = ""
-    __company: CompanyModel = None
+    __settings: SettingsModel = None
 
     def __init__(self):
         self.set_default()
 
-    # Параметры организации из настроек
     @property
-    def company(self) -> CompanyModel:
-        return self.__company
+    def settings(self) -> SettingsModel:
+        return self.__settings
 
     @property
     def file_name(self) -> str:
@@ -44,12 +43,9 @@ class SettingsManager(metaclass=Singleton):
             with open(self.__file_name.strip(), 'r', encoding='utf-8') as file:
                 data = json.load(file)
 
-                if "company" in data:
-                    model_converter.dict_to_company(data["company"], self.__company)
-                    model_validators.validate_company(self.__company)
+            self.__settings.company.load_from_dict(data["company"])
 
-                    return True
-                return False
+            return True
         except Exception as e:
             return False
 
@@ -62,4 +58,6 @@ class SettingsManager(metaclass=Singleton):
         c.corr_account="10987654321"
         c.bik="123456789"
         c.ownership="00001"
-        self.__company = c
+
+        self.__settings = SettingsModel()
+        self.__settings.company = c
