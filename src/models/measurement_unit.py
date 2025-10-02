@@ -13,7 +13,7 @@ class MeasurementUnitModel(AbstractModel):
     # Коэффициент пересчета к базовой единице
     __conversion_factor: float = 1.0
 
-    def __init__(self, name: str, conversion_factor: float = 1.0, base_unit: "MeasurementUnitModel" = None):
+    def __init__(self, name: str="unknown", conversion_factor: float = 1.0, base_unit: "MeasurementUnitModel" = None):
         """
         Конструктор MeasurementUnitModel
         :param name: название единицы измерения
@@ -62,3 +62,26 @@ class MeasurementUnitModel(AbstractModel):
         if self == target_unit:
             return value
         return self.base_unit.convert_to(value*self.conversion_factor, target_unit)
+
+    @staticmethod
+    def create_gram():
+        return MeasurementUnitModel.create("грамм")
+
+    @staticmethod
+    def create_kg():
+        return MeasurementUnitModel.create("кг", MeasurementUnitModel.create_gram(), 1000.0)
+
+    @staticmethod
+    def create(name, base=None, factor=1.0):
+        validate_val(name,str)
+        validate_val(factor,float)
+
+        item = MeasurementUnitModel()
+        if base is not None:
+            validate_val(base, MeasurementUnitModel)
+            item.base_unit = base
+
+        item.name = name
+        item.conversion_factor = factor
+        return item
+
