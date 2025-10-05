@@ -7,11 +7,12 @@ from src.models.validators.functions import validate_val, not_empty
 class RecipeModel(AbstractModel):
     def __init__(self):
         super().__init__()
+        self.__ingredients = []
 
     # Наименование рецепта
     __name: str = ""
     # Состав рецепта: список кортежей (ProductModel, количество)
-    __ingredients: list[tuple["ProductModel", float]] = []
+    __ingredients: list[tuple["ProductModel", float]]
     # Пошаговая инструкция
     __guide: str = ""
 
