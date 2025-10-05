@@ -86,6 +86,8 @@ class StartService:
         kg = self.add_unit("кг", g, 1000.0)
         ton = self.add_unit("т", kg, 1000.0)
         piece = self.add_unit("шт")
+        ml = self.add_unit("мл")
+        l = self.add_unit("л", ml, 1000.0)
 
     def default_create_product_groups(self):
         """
@@ -93,6 +95,10 @@ class StartService:
         """
         food = self.add_product_group("Продукты питания")
         spices = self.add_product_group("Специи")
+        dairy = self.add_product_group("Молочные продукты")
+        vegetables = self.add_product_group("Овощи")
+        meat = self.add_product_group("Мясо")
+        bakery = self.add_product_group("Выпечка")
 
     def default_create_products(self):
         """
@@ -100,19 +106,36 @@ class StartService:
         """
         g = self.__measurement_units.get("грамм")
         piece = self.__measurement_units.get("шт")
+        ml = self.__measurement_units.get("мл")
+
         food = self.__product_groups.get("Продукты питания")
         spices = self.__product_groups.get("Специи")
+        dairy = self.__product_groups.get("Молочные продукты")
+        vegetables = self.__product_groups.get("Овощи")
+        meat = self.__product_groups.get("Мясо")
+        bakery = self.__product_groups.get("Выпечка")
 
+        # Вафли
         flour = self.add_product("Пшеничная мука", "Мука пшеничная высшего сорта", g, food)
         sugar = self.add_product("Сахар", "Сахар белый", g, food)
-        butter = self.add_product("Сливочное масло", "Масло сливочное 82,5%", g, food)
+        butter = self.add_product("Сливочное масло", "Масло сливочное 82,5%", g, dairy)
         egg = self.add_product("Яйцо", "Куриное яйцо", piece, food)
         vanilla = self.add_product("Ванилин", "Ванилин кристаллический", g, spices)
+
+        # Пицца
+        pizza_flour = self.add_product("Мука для пиццы", "Пшеничная мука для пиццы", g, bakery)
+        yeast = self.add_product("Дрожжи", "Сухие дрожжи", g, food)
+        tomato_sauce = self.add_product("Томатный соус", "Соус для пиццы", ml, food)
+        mozzarella = self.add_product("Моцарелла", "Сыр Моцарелла", g, dairy)
+        ham = self.add_product("Ветчина", "Ветчина нарезка", g, meat)
+        bell_pepper = self.add_product("Перец болгарский", "Перец красный/зелёный", g, vegetables)
+        olive_oil = self.add_product("Оливковое масло", "Масло оливковое", ml, food)
 
     def default_create_recipes(self):
         """
         Создать стандартные рецепты.
         """
+        # Вафли
         flour = self.__products.get("Пшеничная мука")
         sugar = self.__products.get("Сахар")
         butter = self.__products.get("Сливочное масло")
@@ -141,6 +164,34 @@ class StartService:
             (egg, 1.0),
             (vanilla, 5.0)
         ],guide_text)
+
+        # Пицца
+        pizza_flour = self.__products.get("Мука для пиццы")
+        yeast = self.__products.get("Дрожжи")
+        tomato_sauce = self.__products.get("Томатный соус")
+        mozzarella = self.__products.get("Моцарелла")
+        ham = self.__products.get("Ветчина")
+        bell_pepper = self.__products.get("Перец болгарский")
+        olive_oil = self.__products.get("Оливковое масло")
+
+        guide_text_pizza = """Время приготовления: 40 мин
+    1. Замесите тесто из муки, дрожжей и воды.
+    2. Дайте тесту подняться 1 час.
+    3. Раскатайте тесто, смажьте томатным соусом.
+    4. Добавьте нарезанную ветчину, перец и сыр.
+    5. Полейте оливковым маслом.
+    6. Выпекайте 15-20 минут при 220°C.
+    Приятного аппетита!"""
+
+        pizza = self.add_recipe("Пицца", [
+            (pizza_flour, 250.0),
+            (yeast, 5.0),
+            (tomato_sauce, 100.0),
+            (mozzarella, 150.0),
+            (ham, 100.0),
+            (bell_pepper, 50.0),
+            (olive_oil, 10.0)
+        ], guide_text_pizza)
 
     def start(self):
         """
