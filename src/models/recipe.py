@@ -42,6 +42,7 @@ class RecipeModel(AbstractModel):
     def ingredients(self) -> list[tuple["ProductModel", float]]:
         return self.__ingredients
 
+    # todo move to another class
     def add_ingredient(self, product: "ProductModel", amount: float):
         """
         Добавить ингредиент в рецепт.

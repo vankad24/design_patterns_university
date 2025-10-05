@@ -2,9 +2,6 @@ import pytest
 
 from src.start_service import StartService
 
-start_service = StartService()
-start_service.start()
-
 class TestStartService:
     def test_start_service_creates_all_entities(self):
         """
@@ -15,6 +12,7 @@ class TestStartService:
         service.start()
 
         # --- Единицы измерения ---
+        # todo service.__measurement_units ???
         units = {u.name: u for u in service.repo.measurement_units}
         grams = units.get("грамм")
         kg = units.get("кг")
