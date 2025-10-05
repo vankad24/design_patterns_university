@@ -1,12 +1,10 @@
+from dataclasses import dataclass, field
 from src.core.singletone import Singleton
 
 
+@dataclass
 class Repository(metaclass=Singleton):
-    MEASUREMENT_UNIT_KEY = "measurement_unit_model"
-
-    __data = {}
-
-    @property
-    def data(self):
-        return self.__data
-
+    measurement_units: list = field(default_factory=list)
+    products: list = field(default_factory=list)
+    product_groups: list = field(default_factory=list)
+    recipes: list = field(default_factory=list)

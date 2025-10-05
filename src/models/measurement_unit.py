@@ -63,24 +63,16 @@ class MeasurementUnitModel(AbstractModel):
             return value
         return self.base_unit.convert_to(value*self.conversion_factor, target_unit)
 
-    @staticmethod
-    def create_gram():
-        return MeasurementUnitModel.create("грамм")
-
-    @staticmethod
-    def create_kg():
-        return MeasurementUnitModel.create("кг", MeasurementUnitModel.create_gram(), 1000.0)
 
     @staticmethod
     def create(name, base=None, factor=1.0):
-        validate_val(name,str)
-        validate_val(factor,float)
+        """
+        Фабричный метод для создания экземпляра класса
+        """
 
         item = MeasurementUnitModel()
         if base is not None:
-            validate_val(base, MeasurementUnitModel)
             item.base_unit = base
-
         item.name = name
         item.conversion_factor = factor
         return item
