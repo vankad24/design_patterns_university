@@ -12,6 +12,8 @@ class RecipeModel(AbstractModel):
     __name: str = ""
     # Состав рецепта: список кортежей (ProductModel, количество)
     __ingredients: list[tuple["ProductModel", float]] = []
+    # Пошаговая инструкция
+    __guide: str = ""
 
     # --- Название ---
     @property
@@ -22,6 +24,17 @@ class RecipeModel(AbstractModel):
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
         self.__name = value.strip()
+
+        # --- Инструкция ---
+
+    @property
+    def guide(self) -> str:
+        return self.__guide
+
+    @guide.setter
+    @validate_setter(str)
+    def guide(self, value: str):
+        self.__guide = value.strip()
 
     # --- Ингредиенты ---
     @property
@@ -53,11 +66,12 @@ class RecipeModel(AbstractModel):
         return len(self.__ingredients)
 
     @staticmethod
-    def create(name: str, ingredients: list[tuple["ProductModel", float]] = None):
+    def create(name: str, ingredients: list[tuple["ProductModel", float]] = None, guide: str = ""):
         """
         Фабричный метод для создания экземпляра RecipeModel.
         :param name: название рецепта
         :param ingredients: список (ProductModel, количество)
+        :param guide: инструкция по приготовлению
         :return: экземпляр RecipeModel
         """
         item = RecipeModel()
@@ -65,4 +79,6 @@ class RecipeModel(AbstractModel):
         if ingredients:
             for product, amount in ingredients:
                 item.add_ingredient(product, amount)
+        if guide:
+            item.guide = guide
         return item
