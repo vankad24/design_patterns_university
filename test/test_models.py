@@ -4,6 +4,7 @@ import uuid
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
+from src.models.recipe import RecipeModel
 from src.models.storage import StorageModel
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
@@ -298,6 +299,89 @@ class TestModels:
         with pytest.raises(RuntimeError) as exc_info:
             product.full_name = long_full_name
 
+    def test_recipe_create_model(self):
+        """
+        Проверяет фабричный метод create для RecipeModel.
+        """
+        group = ProductGroupModel.create("Продукты питания")
+        unit_g = MeasurementUnitModel.create("грамм")
+        flour = ProductModel.create("Мука", "Пшеничная мука", unit_g, group)
+
+        ingredients = [(flour, 200.0)]
+        recipe = RecipeModel.create("Тесто", ingredients)
+
+        assert recipe.name == "Тесто"
+        assert len(recipe.ingredients) == 1
+        assert recipe.ingredients[0] == (flour, 200.0)
+
+    def test_recipe_creation_and_ingredients(self):
+        """
+        Проверяет создание RecipeModel и корректность добавления ингредиентов.
+        """
+        # Создание группы и продуктов
+        group = ProductGroupModel()
+        group.name = "Продукты питания"
+
+        unit_g = MeasurementUnitModel("грамм", 1.0)
+        unit_piece = MeasurementUnitModel("шт", 1.0)
+
+        flour = ProductModel()
+        flour.name = "Мука"
+        flour.full_name = "Пшеничная мука"
+        flour.unit = unit_g
+        flour.group = group
+
+        egg = ProductModel()
+        egg.name = "Яйцо"
+        egg.full_name = "Куриное яйцо"
+        egg.unit = unit_piece
+        egg.group = group
+
+        # Создание рецепта
+        recipe = RecipeModel()
+        recipe.name = "Блинчики"
+        recipe.add_ingredient(flour, 100.0)
+        recipe.add_ingredient(egg, 2.0)
+
+        assert recipe.name == "Блинчики"
+        assert len(recipe.ingredients) == 2
+        assert recipe.ingredients[0] == (flour, 100.0)
+        assert recipe.ingredients[1] == (egg, 2.0)
+
+    def test_add_ingredient_invalid_values(self):
+        """
+        Проверяет, что при добавлении неверных типов или отрицательного количества выбрасывается исключение.
+        """
+        recipe = RecipeModel.create("Тестовый рецепт")
+        product = ProductModel.create("Мука", "Мука пшеничная", MeasurementUnitModel.create("грамм"),
+                                      ProductGroupModel.create("Продукты"))
+
+        # Неверный тип продукта
+        with pytest.raises(ArgumentException):
+            recipe.add_ingredient("not a product", 100.0)
+
+        # Неверный тип количества
+        with pytest.raises(ArgumentException):
+            recipe.add_ingredient(product, "100")
+
+        # Отрицательное количество
+        with pytest.raises(ArgumentException):
+            recipe.add_ingredient(product, -50.0)
+
+    def test_remove_ingredient(self):
+        """
+        Проверяет корректное удаление ингредиента из рецепта.
+        """
+        group = ProductGroupModel.create("Продукты")
+        unit = MeasurementUnitModel.create("грамм")
+        flour = ProductModel.create("Мука", "Мука пшеничная", unit, group)
+        sugar = ProductModel.create("Сахар", "Сахар белый", unit, group)
+
+        recipe = RecipeModel.create("Тесто", [(flour, 100.0), (sugar, 50.0)])
+        recipe.remove_ingredient(flour)
+
+        assert len(recipe.ingredients) == 1
+        assert recipe.ingredients[0][0] == sugar
 
 if __name__ == "__main__":
     pytest.main(['-v'])

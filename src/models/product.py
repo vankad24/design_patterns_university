@@ -1,6 +1,6 @@
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
-from src.models.validators.functions import not_empty
+from src.models.validators.functions import not_empty, validate_val
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product_group import ProductGroupModel
 
@@ -11,8 +11,6 @@ class ProductModel(AbstractModel):
     def __init__(self):
         super().__init__()
 
-    # Код номенклатуры
-    __code: str = ""
     # Название номенклатуры (до 50 символов)
     __name: str = ""
     # Полное наименование (до 255 символов)
@@ -21,18 +19,6 @@ class ProductModel(AbstractModel):
     __unit: MeasurementUnitModel = None
     # Группа номенклатуры
     __group: ProductGroupModel = None
-    # Цена
-    __price: float = 0.0
-
-    # --- Код ---
-    @property
-    def code(self) -> str:
-        return self.__code
-
-    @code.setter
-    @validate_setter(str, check_func=not_empty)
-    def code(self, value: str):
-        self.__code = value.strip()
 
     # --- Название ---
     @property
@@ -74,12 +60,22 @@ class ProductModel(AbstractModel):
     def group(self, value: ProductGroupModel):
         self.__group = value
 
-    # --- Цена ---
-    @property
-    def price(self) -> float:
-        return self.__price
-
-    @price.setter
-    @validate_setter(float)
-    def price(self, value: float):
-        self.__price = value
+    @staticmethod
+    def create(name: str, full_name: str = "", unit: MeasurementUnitModel = None, group: "ProductGroupModel" = None):
+        """
+        Фабричный метод для создания экземпляра ProductModel
+        :param name: краткое наименование (до 50 символов)
+        :param full_name: полное наименование (до 255 символов)
+        :param unit: единица измерения
+        :param group: группа номенклатуры
+        :return: экземпляр ProductModel
+        """
+        item = ProductModel()
+        item.name = name
+        if full_name:
+            item.full_name = full_name
+        if unit:
+            item.unit = unit
+        if group:
+            item.group = group
+        return item

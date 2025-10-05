@@ -21,3 +21,14 @@ class ProductGroupModel(AbstractModel):
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
         self.__name = value.strip()
+
+    @staticmethod
+    def create(name: str):
+        """
+        Фабричный метод для создания экземпляра ProductGroupModel
+        :param name: наименование группы
+        :return: экземпляр ProductGroupModel
+        """
+        item = ProductGroupModel()
+        item.name = name
+        return item
