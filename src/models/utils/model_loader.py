@@ -15,15 +15,12 @@ def load_from_dict(obj: AbstractModel, data: dict, created_models=None):
     hint_types = get_type_hints_without_underscore(obj.__class__)
     for key, value in data.items():
         if not key.startswith("_") and hasattr(obj, key):
+            # класс поля взятый из type hint
             attr_type = hint_types.get(key, None)
+            # если поле является потомком AbstractModel и при этом в него загружается словарь
             if attr_type and issubclass(attr_type, AbstractModel) and isinstance(value, dict):
-                model_id = value['id']
-                if model_id in created_models:
-                    model_obj = created_models.get(model_id, )
-                else:
-                    model_obj = attr_type.__call__()
-                    created_models[model_id] = model_obj
-                    load_from_dict(model_obj,value,created_models)
+                # в этом словаре обязательно должен быть id, который должен присутствовать в созданных объектах
+                model_obj = created_models[value['id']]
                 setattr(obj, key, model_obj)
             else:
                 setattr(obj, key, value)
