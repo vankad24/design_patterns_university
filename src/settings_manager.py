@@ -1,9 +1,9 @@
 import os.path
 
 from src.core.functions import load_json
+from src.core.singletone import Singleton
 from src.models.company import CompanyModel
 from src.models.settings import SettingsModel
-from src.core.singletone import Singleton
 from src.models.utils.model_loader import load_from_dict
 
 

@@ -9,20 +9,28 @@ from src.models.recipe import RecipeModel
 from src.models.utils import model_loader
 from src.repository import Repository, RepoKeys
 
-
 class StartService(metaclass=Singleton):
     """
-    Сервис инициализации базовых данных:
-    - единицы измерения
-    - группы номенклатуры
-    - продукты
-    - рецепты
+    Сервис для инициализации базовых данных приложения:
+    - Единицы измерения
+    - Группы номенклатуры
+    - Продукты
+    - Ингредиенты
+    - Рецепты
+
+    Использует Singleton, чтобы существовал только один экземпляр сервиса.
     """
 
     __created_models: dict
     __repo: Repository
 
     def __init__(self):
+        """
+        Инициализация сервиса:
+        - Загружает ссылку на репозиторий.
+        - Создаёт пустые словари для хранения созданных моделей по ключам RepoKeys.
+        - Устанавливает путь к JSON-файлу с данными.
+        """
         self.__loaded_data = None
         self.__filepath = '../settings.json'
         self.__repo = Repository()
@@ -33,9 +41,20 @@ class StartService(metaclass=Singleton):
     # --- Репозиторий ---
     @property
     def repo(self):
+        """
+        Возвращает объект репозитория.
+        Используется для доступа к загруженным моделям по ключам RepoKeys.
+        """
         return self.__repo
 
     def create_models_from_loaded(self, key: RepoKeys, model_type):
+        """
+        Создаёт модели заданного типа из ранее загруженных данных JSON
+        и сохраняет их в created_models и репозитории.
+
+        :param key: ключ из RepoKeys, определяющий тип данных
+        :param model_type: класс модели, которая будет создана (наследник AbstractModel)
+        """
         for item in self.__loaded_data[key]:
             model: AbstractModel = model_type()
             model_loader.load_from_dict(model, item, self.__created_models)
@@ -43,11 +62,16 @@ class StartService(metaclass=Singleton):
             self.repo.data[key][model.id] = model
 
     def load(self, filepath):
-        self.__loaded_data = load_json(filepath)
+        """
+        Загружает данные из JSON-файла и сохраняет их во внутреннее поле __loaded_data.
 
+        :param filepath: путь к JSON-файлу
+        """
+        self.__loaded_data = load_json(filepath)
     def start(self):
         """
-        Создать все стандартные сущности.
+        Создаёт все стандартные сущности приложения.
+        Порядок загрузки важен
         """
         # Не менять порядок
         self.load(self.__filepath)

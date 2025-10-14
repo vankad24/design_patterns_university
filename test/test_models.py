@@ -20,11 +20,17 @@ import pytest
 
 
 class ChildTestModel(AbstractModel):
+    """
+    Класс тестовой модели для тестов
+    """
     id: str = ""
     name: str = ""
 
 
 class ParentTestModel(AbstractModel):
+    """
+    Класс тестовой модели для тестов
+    """
     id: str = ""
     name: str = ""
     child: ChildTestModel = None
@@ -455,6 +461,11 @@ class TestModels:
             ingredient.unit = "not_a_unit"
 
     def test_load_from_dict_basic_and_relations(self):
+        """
+        Проверяет корректную загрузку простых полей и связей между объектами:
+        - Простое поле parent.child ссылается на объект из created_models.
+        - Список parent.children ссылается на несколько объектов из created_models.
+        """
         # Генерация id
         id_c1 = str(uuid.uuid4())
         id_c2 = str(uuid.uuid4())
@@ -486,6 +497,10 @@ class TestModels:
         assert parent.children == [child1, child2]
 
     def test_load_from_dict_missing_id_key(self):
+        """
+        Проверяет, что выбрасывается KeyError, если в словаре,
+        который должен ссылаться на объект, отсутствует 'id'.
+        """
         parent = ParentTestModel()
         created_models = {}
         data = {"child": {"name": "No ID"}}
@@ -495,6 +510,10 @@ class TestModels:
         assert "Отсутствует 'id' в словаре" in e.value.args[0]
 
     def test_load_from_dict_id_not_in_created_models(self):
+        """
+        Проверяет, что выбрасывается KeyError, если указанный 'id' в словаре
+        отсутствует в created_models.
+        """
         parent = ParentTestModel()
         created_models = {}
         missing_id = str(uuid.uuid4())

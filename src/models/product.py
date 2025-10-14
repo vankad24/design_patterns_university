@@ -1,8 +1,7 @@
 from src.models.abstract_model import AbstractModel
-from src.models.validators.decorators import validate_setter
-from src.models.validators.functions import not_empty, validate_val
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product_group import ProductGroupModel
+from src.models.validators.decorators import validate_setter
 
 
 ###############################################
