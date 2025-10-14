@@ -1,4 +1,5 @@
 from src.core.functions import load_json
+from src.core.singletone import Singleton
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
@@ -9,7 +10,7 @@ from src.models.utils import model_loader
 from src.repository import Repository, RepoKeys
 
 
-class StartService:
+class StartService(metaclass=Singleton):
     """
     Сервис инициализации базовых данных:
     - единицы измерения
