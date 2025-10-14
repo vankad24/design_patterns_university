@@ -66,5 +66,5 @@ def recipe_to_markdown(recipe: RecipeModel) -> str:
             md_lines.append(f"{i}. {step}")
         md_lines.append("")  # пустая строка после инструкции
 
-    md_lines.append("---")  # разделитель в конце
+    md_lines.append("---\n")  # разделитель в конце
     return "\n".join(md_lines)

@@ -1,4 +1,6 @@
 import pytest
+
+from src.models.utils.model_loader import recipe_to_markdown
 from src.repository import RepoKeys
 from src.start_service import StartService
 
@@ -77,6 +79,47 @@ class TestStartService:
             for ing_ref in recipe.ingredients:
                 assert ing_ref in ingredients.values()
 
+    def test_recipe_to_markdown(self, service):
+        """Проверяет генерацию Markdown для рецепта и генерирует Recipes.md файл"""
+        recipes = service.repo.data[RepoKeys.RECIPES]
+        waffles = recipes['de0e0123-0442-4d14-bbf9-053eefbfe907']
+
+        md = recipe_to_markdown(waffles)
+
+        right_md = """## Вафли
+
+**Время приготовления:** 20 мин
+
+**Ингредиенты:**
+
+* Пшеничная мука – 100.0 Грамм
+* Сахар – 80.0 Грамм
+* Сливочное масло – 70.0 Грамм
+* Яйцо – 1.0 Штуки
+* Ванилин – 5.0 Грамм
+
+**Инструкция:**
+
+1. Подготовьте продукты.
+2. Масло положите в сотейник с толстым дном. Растопите его на маленьком огне, на водяной бане либо в микроволновке.
+3. Добавьте в тёплое масло сахар и перемешайте венчиком до полного растворения.
+4. Добавьте яйцо и перемешайте до однородности.
+5. Всыпьте муку, добавьте ванилин.
+6. Перемешайте массу до состояния гладкого однородного теста.
+7. Разогрейте вафельницу и выкладывайте тесто по столовой ложке.
+8. Выпекайте вафли до золотистого цвета. Осторожно снимите их лопаткой.
+9. Подавать горячими или остудить до хрустящей текстуры.
+
+---
+"""
+        assert md == right_md
+
+        result_md = ""
+        for id_key, recipe in recipes.items():
+            result_md+=recipe_to_markdown(recipe)
+
+        with open("Recipes.md", "w", encoding='utf-8') as f:
+            f.write(result_md)
 
 if __name__ == "__main__":
     pytest.main(['-v'])
