@@ -49,7 +49,6 @@ class StartService(metaclass=Singleton):
         """
         Создать все стандартные сущности.
         """
-        # todo exceptions
         # Не менять порядок
         self.load(self.__filepath)
         self.create_models_from_loaded(RepoKeys.MEASUREMENT_UNITS, MeasurementUnitModel)

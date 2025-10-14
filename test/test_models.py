@@ -3,18 +3,32 @@ import shutil
 import tempfile
 import uuid
 
+from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
 from src.models.storage import StorageModel
+from src.models.utils.model_loader import load_from_dict
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
 from src.models.utils import model_loader
 
 import pytest
+
+
+class ChildTestModel(AbstractModel):
+    id: str = ""
+    name: str = ""
+
+
+class ParentTestModel(AbstractModel):
+    id: str = ""
+    name: str = ""
+    child: ChildTestModel = None
+    children: list[ChildTestModel] = None
 
 class TestModels:
     """
@@ -230,7 +244,7 @@ class TestModels:
         """
         Проверяет, что два StorageModel с одинаковым id считаются равными.
         """
-        myid = uuid.uuid4().hex
+        myid = str(uuid.uuid4())
         storage1 = StorageModel()
         storage2 = StorageModel()
         storage1.id = myid
@@ -440,6 +454,55 @@ class TestModels:
         with pytest.raises(RuntimeError):
             ingredient.unit = "not_a_unit"
 
+    def test_load_from_dict_basic_and_relations(self):
+        # Генерация id
+        id_c1 = str(uuid.uuid4())
+        id_c2 = str(uuid.uuid4())
+
+        # Подготовка created_models
+        child1 = ChildTestModel()
+        child1.id = id_c1
+        child1.name = "Child 1"
+
+        child2 = ChildTestModel()
+        child2.id = id_c2
+        child2.name = "Child 2"
+
+        created_models = {id_c1: child1, id_c2: child2}
+
+        # Данные для загрузки
+        data = {
+            "id": str(uuid.uuid4()),
+            "name": "Parent",
+            "child": {"id": id_c1},
+            "children": [{"id": id_c1}, {"id": id_c2}]
+        }
+
+        parent = ParentTestModel()
+        load_from_dict(parent, data, created_models)
+
+        # Проверки
+        assert parent.child is child1
+        assert parent.children == [child1, child2]
+
+    def test_load_from_dict_missing_id_key(self):
+        parent = ParentTestModel()
+        created_models = {}
+        data = {"child": {"name": "No ID"}}
+
+        with pytest.raises(KeyError) as e:
+            load_from_dict(parent, data, created_models)
+        assert "Отсутствует 'id' в словаре" in e.value.args[0]
+
+    def test_load_from_dict_id_not_in_created_models(self):
+        parent = ParentTestModel()
+        created_models = {}
+        missing_id = str(uuid.uuid4())
+        data = {"child": {"id": missing_id}}
+
+        with pytest.raises(KeyError) as e:
+            load_from_dict(parent, data, created_models)
+        assert f"Не найден объект с id='{missing_id}'" in e.value.args[0]
 
 if __name__ == "__main__":
     pytest.main(['-v'])
