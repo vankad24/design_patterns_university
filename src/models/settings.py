@@ -5,15 +5,15 @@ from src.models.validators.decorators import validate_setter
 ######################################
 # Модель настроек приложения
 class SettingsModel:
-    __company: CompanyModel = None
+    _company: CompanyModel = None
 
     # Организация
     @property
     def company(self) -> CompanyModel:
-        return self.__company
+        return self._company
 
     @company.setter
     @validate_setter(CompanyModel)
     def company(self, value: CompanyModel):
-        self.__company = value
+        self._company = value
 

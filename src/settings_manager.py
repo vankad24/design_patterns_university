@@ -1,9 +1,11 @@
-import json
 import os.path
 
+from src.core.functions import load_json
 from src.models.company import CompanyModel
 from src.models.settings import SettingsModel
 from src.core.singletone import Singleton
+from src.models.utils.model_loader import load_from_dict
+
 
 ####################################################
 # Менеджер настроек.
@@ -33,21 +35,12 @@ class SettingsManager(metaclass=Singleton):
         if os.path.exists(path):
             self.__file_name = path
         else:
-            raise Exception(f"Не найден файл настроек: {path}")
+            raise FileNotFoundError(f"Не найден файл настроек: {path}")
 
     # Загрузить настройки из Json файла
-    def load(self) -> bool:
-        if self.__file_name.strip() == "":
-            raise Exception("Не найден файл настроек!")
-        try:
-            with open(self.__file_name.strip(), 'r', encoding='utf-8') as file:
-                data = json.load(file)
-
-            self.__settings.company.load_from_dict(data["company"])
-
-            return True
-        except Exception as e:
-            return False
+    def load(self):
+        data = load_json(self.__file_name)
+        load_from_dict(self.__settings.company, data["company"])
 
     # Параметры настроек по умолчанию
     def set_default(self):

@@ -10,17 +10,17 @@ class ProductGroupModel(AbstractModel):
         super().__init__()
 
     # Наименование группы
-    __name: str = ""
+    _name: str = ""
 
     # --- Название группы ---
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
 
     @name.setter
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
-        self.__name = value.strip()
+        self._name = value.strip()
 
     @staticmethod
     def create(name: str):

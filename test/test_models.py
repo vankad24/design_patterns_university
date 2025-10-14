@@ -1,6 +1,9 @@
 import os.path
+import shutil
+import tempfile
 import uuid
 
+from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
@@ -9,6 +12,7 @@ from src.models.storage import StorageModel
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
+from src.models.utils import model_loader
 
 import pytest
 
@@ -46,38 +50,58 @@ class TestModels:
         Проверяет загрузку данных CompanyModel из JSON файла через SettingsManager.
         Проверяется корректность имени компании после загрузки.
         """
-        file_name = '../settings.json'
+        file_name = 'test_settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
 
         # Действие
-        result = manager.load()
+        manager.load()
 
         # Проверки
-        assert result == True
-        assert manager.settings.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'ООО Тестовая Ромашка'
 
     def test_load_company_model_abs_path(self):
         """
         Проверяет загрузку данных CompanyModel из JSON файла по абсолютному пути.
         """
-        file_name = os.path.abspath('../settings.json')
+        file_name = os.path.abspath('test_settings.json')
         manager = SettingsManager()
         manager.file_name = file_name
 
         # Действие
-        result = manager.load()
+        manager.load()
 
         # Проверки
-        assert result == True
-        assert manager.settings.company.name == 'Рога и копыта'
+        assert manager.settings.company.name == 'ООО Тестовая Ромашка'
+
+    def test_load_company_exception_file_not_found(self):
+        """
+        Проверяет обработку ошибок при загрузке JSON файла через SettingsManager,
+        используя временную копию файла, а затем удаляя ее для проверки ошибки.
+        """
+        file_name = os.path.abspath('test_settings.json')
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            shutil.copyfile(file_name, tmp_file.name)
+            file_name = tmp_file.name
+        manager = SettingsManager()
+        manager.file_name = file_name
+
+        # Действие
+        os.remove(file_name)
+
+        # Проверки
+        with pytest.raises(FileNotFoundError) as exc_info:
+            manager.load()
+        with pytest.raises(FileNotFoundError) as exc_info:
+            manager.file_name = file_name
+
 
     def test_load_model_company_model_from_same_file(self):
         """
         Проверяет работу Singleton при загрузке CompanyModel из одного и того же файла.
         Ожидается, что два менеджера будут использовать один и тот же объект company.
         """
-        file_name = '../settings.json'
+        file_name = 'test_settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
         manager2 = SettingsManager()
@@ -105,7 +129,7 @@ class TestModels:
         company = CompanyModel()
 
         # Действие
-        company.load_from_dict(data)
+        model_loader.load_from_dict(company, data)
 
         # Проверки
         assert company.name == data["name"]
@@ -128,7 +152,7 @@ class TestModels:
             "bik": "123456789",
             "ownership": "00002"
         }
-        file_name = './test_company.json'
+        file_name = 'test_settings.json'
         manager = SettingsManager()
         manager.file_name = file_name
 
@@ -151,11 +175,11 @@ class TestModels:
         """
         company = CompanyModel()
         with pytest.raises(ArgumentException) as exc_info:
-            company.load_from_dict(None)
+            model_loader.load_from_dict(company, None)
         assert exc_info.value.args[0] == "Пустой аргумент"
 
         with pytest.raises(ArgumentException) as exc_info:
-            company.load_from_dict(["name"])
+            model_loader.load_from_dict(company,["name"])
         assert exc_info.value.args[0].startswith("Некорректный тип")
 
     # Параметры для тестирования некорректных значений полей компании
@@ -195,7 +219,7 @@ class TestModels:
         company = CompanyModel()
 
         with pytest.raises(RuntimeError) as exc_info:
-            company.load_from_dict(data)
+            model_loader.load_from_dict(company,data)
 
         assert exc_info.value.args[0] == f"Setter '{field}' не выполнился"
         caused_exc = exc_info.value.__cause__
@@ -307,12 +331,14 @@ class TestModels:
         unit_g = MeasurementUnitModel.create("грамм")
         flour = ProductModel.create("Мука", "Пшеничная мука", unit_g, group)
 
-        ingredients = [(flour, 200.0)]
+        ingredients = [IngredientModel.create(flour, 200.0, unit_g)]
         recipe = RecipeModel.create("Тесто", ingredients)
 
         assert recipe.name == "Тесто"
         assert len(recipe.ingredients) == 1
-        assert recipe.ingredients[0] == (flour, 200.0)
+        assert recipe.ingredients[0].product == flour
+        assert recipe.ingredients[0].amount == 200.0
+        assert recipe.ingredients[0].unit == unit_g
 
     def test_recipe_creation_and_ingredients(self):
         """
@@ -337,51 +363,83 @@ class TestModels:
         egg.unit = unit_piece
         egg.group = group
 
+        ingredients = [
+            IngredientModel.create(flour, 100.0, unit_g),
+            IngredientModel.create(egg, 2.0, unit_piece),
+        ]
+
         # Создание рецепта
         recipe = RecipeModel()
         recipe.name = "Блинчики"
-        recipe.add_ingredient(flour, 100.0)
-        recipe.add_ingredient(egg, 2.0)
+        recipe.ingredients = ingredients
 
         assert recipe.name == "Блинчики"
         assert len(recipe.ingredients) == 2
-        assert recipe.ingredients[0] == (flour, 100.0)
-        assert recipe.ingredients[1] == (egg, 2.0)
+        assert recipe.ingredients[0].product == flour
+        assert recipe.ingredients[0].amount == 100.0
+        assert recipe.ingredients[0].unit == unit_g
+        assert recipe.ingredients[1].product == egg
+        assert recipe.ingredients[1].amount == 2.0
+        assert recipe.ingredients[1].unit == unit_piece
 
-    def test_add_ingredient_invalid_values(self):
-        """
-        Проверяет, что при добавлении неверных типов или отрицательного количества выбрасывается исключение.
-        """
-        recipe = RecipeModel.create("Тестовый рецепт")
-        product = ProductModel.create("Мука", "Мука пшеничная", MeasurementUnitModel.create("грамм"),
-                                      ProductGroupModel.create("Продукты"))
-
-        # Неверный тип продукта
-        with pytest.raises(ArgumentException):
-            recipe.add_ingredient("not a product", 100.0)
-
-        # Неверный тип количества
-        with pytest.raises(ArgumentException):
-            recipe.add_ingredient(product, "100")
-
-        # Отрицательное количество
-        with pytest.raises(ArgumentException):
-            recipe.add_ingredient(product, -50.0)
-
-    def test_remove_ingredient(self):
-        """
-        Проверяет корректное удаление ингредиента из рецепта.
-        """
+    def test_create_ingredient_model_returns_valid_instance(self):
+        """IngredientModel.create — возвращает корректный экземпляр"""
+        unit_g = MeasurementUnitModel.create("грамм")
         group = ProductGroupModel.create("Продукты")
-        unit = MeasurementUnitModel.create("грамм")
-        flour = ProductModel.create("Мука", "Мука пшеничная", unit, group)
-        sugar = ProductModel.create("Сахар", "Сахар белый", unit, group)
+        flour = ProductModel.create("Мука", "Пшеничная мука", unit_g, group)
 
-        recipe = RecipeModel.create("Тесто", [(flour, 100.0), (sugar, 50.0)])
-        recipe.remove_ingredient(flour)
+        ingredient = IngredientModel.create(flour, 200.0, unit_g)
 
-        assert len(recipe.ingredients) == 1
-        assert recipe.ingredients[0][0] == sugar
+        assert ingredient.product == flour
+        assert ingredient.amount == 200.0
+        assert ingredient.unit == unit_g
+
+    def test_product_setter_getter_sets_and_returns_product_model(self):
+        """Сеттер/геттер product — корректно сохраняет и возвращает ProductModel"""
+        unit_piece = MeasurementUnitModel.create("шт")
+        group = ProductGroupModel.create("Продукты")
+        egg = ProductModel.create("Яйцо", "Куриное яйцо", unit_piece, group)
+
+        ingredient = IngredientModel()
+        ingredient.product = egg
+
+        assert ingredient.product == egg
+
+    def test_amount_setter_getter_sets_and_returns_positive_float(self):
+        """Сеттер/геттер amount — корректно сохраняет и возвращает положительное число"""
+        unit_g = MeasurementUnitModel.create("грамм")
+        ingredient = IngredientModel()
+        ingredient.amount = 3.5
+
+        assert ingredient.amount == 3.5
+
+    def test_amount_setter_raises_runtime_error_on_invalid_value(self):
+        """Сеттер amount — выбрасывает RuntimeError при значении <= 0"""
+        unit_g = MeasurementUnitModel.create("грамм")
+        group = ProductGroupModel.create("Продукты")
+        flour = ProductModel.create("Мука", "Пшеничная мука", unit_g, group)
+        ingredient = IngredientModel()
+        ingredient.product = flour
+        ingredient.unit = unit_g
+
+        with pytest.raises(RuntimeError):
+            ingredient.amount = -1.0
+
+        with pytest.raises(RuntimeError):
+            ingredient.amount = 0.0
+
+    def test_product_setter_raises_runtime_error_on_invalid_type(self):
+        """Сеттер product — выбрасывает RuntimeError при неверном типе"""
+        ingredient = IngredientModel()
+        with pytest.raises(RuntimeError):
+            ingredient.product = "not_a_product"
+
+    def test_unit_setter_raises_runtime_error_on_invalid_type(self):
+        """Сеттер unit — выбрасывает RuntimeError при неверном типе"""
+        ingredient = IngredientModel()
+        with pytest.raises(RuntimeError):
+            ingredient.unit = "not_a_unit"
+
 
 if __name__ == "__main__":
     pytest.main(['-v'])
