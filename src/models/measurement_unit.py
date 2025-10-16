@@ -7,11 +7,11 @@ from src.models.validators.functions import not_empty, validate_val
 # Модель единицы измерения
 class MeasurementUnitModel(AbstractModel):
     # Наименование единицы измерения
-    __name: str = ""
+    _name: str = ""
     # Базовая единица измерения
-    __base_unit: "MeasurementUnitModel" = None
+    _base_unit: "MeasurementUnitModel" = None
     # Коэффициент пересчета к базовой единице
-    __conversion_factor: float = 1.0
+    _conversion_factor: float = 1.0
 
     def __init__(self, name: str="unknown", conversion_factor: float = 1.0, base_unit: "MeasurementUnitModel" = None):
         """
@@ -28,32 +28,32 @@ class MeasurementUnitModel(AbstractModel):
     # --- Название ---
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
 
     @name.setter
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
-        self.__name = value.strip()
+        self._name = value.strip()
 
     # --- Базовая единица ---
     @property
     def base_unit(self) -> "MeasurementUnitModel":
-        return self.__base_unit
+        return self._base_unit
 
     @base_unit.setter
     def base_unit(self, value: "MeasurementUnitModel"):
         validate_val(value, MeasurementUnitModel)
-        self.__base_unit = value
+        self._base_unit = value
 
     # --- Коэффициент пересчета ---
     @property
     def conversion_factor(self) -> float:
-        return self.__conversion_factor
+        return self._conversion_factor
 
     @conversion_factor.setter
     @validate_setter(float)
     def conversion_factor(self, value: float):
-        self.__conversion_factor = value
+        self._conversion_factor = value
 
     def convert_to(self, value: float, target_unit: "MeasurementUnitModel") -> float:
         """

@@ -1,86 +1,82 @@
 from src.models.abstract_model import AbstractModel
-from src.models.product import ProductModel
+from src.models.ingridient import IngredientModel
 from src.models.validators.decorators import validate_setter
 from src.models.validators.functions import validate_val, not_empty
 
 
+###############################################
+# Модель рецепта
 class RecipeModel(AbstractModel):
-    def __init__(self):
-        super().__init__()
-        self.__ingredients = []
-
     # Наименование рецепта
-    __name: str = ""
-    # Состав рецепта: список кортежей (ProductModel, количество)
-    __ingredients: list[tuple["ProductModel", float]]
+    _name: str = ""
+    # Время приготовления
+    _cooking_time: str = ""
     # Пошаговая инструкция
-    __guide: str = ""
+    _steps: list[str] = []
+    # Состав рецепта — список IngredientModel
+    _ingredients: list[IngredientModel] = []
 
-    # --- Название ---
+    # --- Наименование ---
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
 
     @name.setter
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
-        self.__name = value.strip()
+        self._name = value.strip()
 
-        # --- Инструкция ---
-
+    # --- Время приготовления ---
     @property
-    def guide(self) -> str:
-        return self.__guide
+    def cooking_time(self) -> str:
+        return self._cooking_time
 
-    @guide.setter
-    @validate_setter(str)
-    def guide(self, value: str):
-        self.__guide = value.strip()
+    @cooking_time.setter
+    @validate_setter(str, check_func=not_empty)
+    def cooking_time(self, value: str):
+        self._cooking_time = value.strip()
 
-    # --- Ингредиенты ---
+    # --- Пошаговая инструкция ---
     @property
-    def ingredients(self) -> list[tuple["ProductModel", float]]:
-        return self.__ingredients
+    def steps(self) -> list[str]:
+        return self._steps
 
-    # todo move to another class
-    def add_ingredient(self, product: "ProductModel", amount: float):
-        """
-        Добавить ингредиент в рецепт.
-        :param product: экземпляр ProductModel
-        :param amount: количество (например, 100 грамм)
-        """
-        validate_val(product, ProductModel)
-        validate_val(amount, float, check_func=lambda x: x > 0)
-        self.__ingredients.append((product, amount))
+    @steps.setter
+    @validate_setter(list)
+    def steps(self, value: list[str]):
+        for step in value:
+            validate_val(step, str)
+        self._steps = value
 
-    def remove_ingredient(self, product: "ProductModel"):
-        """
-        Удалить ингредиент по ссылке на продукт.
-        """
-        self.__ingredients = [
-            (p, a) for (p, a) in self.__ingredients if p != product
-        ]
+    # --- Состав ---
+    @property
+    def ingredients(self) -> list[IngredientModel]:
+        return self._ingredients
 
-    def get_total_items(self) -> int:
-        """
-        Вернуть количество позиций в рецепте.
-        """
-        return len(self.__ingredients)
+    @ingredients.setter
+    @validate_setter(list)
+    def ingredients(self, value: list[IngredientModel]):
+        for ing in value:
+            validate_val(ing, IngredientModel)
+        self._ingredients = value
 
+    # --- Фабричный метод ---
     @staticmethod
-    def create(name: str, ingredients: list[tuple["ProductModel", float]] = None, guide: str = ""):
+    def create(name: str, ingredients: list[IngredientModel] = None, steps: list[str] = None, cooking_time: str = ""):
         """
         Фабричный метод для создания экземпляра RecipeModel.
         :param name: название рецепта
-        :param ingredients: список (ProductModel, количество)
-        :param guide: инструкция по приготовлению
+        :param ingredients: список экземпляров IngredientModel
+        :param steps: список шагов инструкции
+        :param cooking_time: время приготовления
         :return: экземпляр RecipeModel
         """
         item = RecipeModel()
         item.name = name
         if ingredients:
-            for product, amount in ingredients:
-                item.add_ingredient(product, amount)
-        if guide:
-            item.guide = guide
+            item.ingredients = ingredients
+        if steps:
+            item.steps = steps
+        if cooking_time:
+            item.cooking_time = cooking_time
         return item

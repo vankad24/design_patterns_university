@@ -7,26 +7,26 @@ from src.models.validators.functions import not_empty
 # Модель склада
 class StorageModel(AbstractModel):
     # Наименование склада
-    __name: str = ""
+    _name: str = ""
     # Адрес склада
-    __address: str = ""
+    _address: str = ""
 
     # --- Название склада ---
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
 
     @name.setter
     @validate_setter(str, check_func=not_empty)
     def name(self, value: str):
-        self.__name = value.strip()
+        self._name = value.strip()
 
     # --- Адрес склада ---
     @property
     def address(self) -> str:
-        return self.__address
+        return self._address
 
     @address.setter
     @validate_setter(str, check_func=not_empty)
     def address(self, value: str):
-        self.__address = value.strip()
+        self._address = value.strip()
