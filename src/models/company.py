@@ -1,3 +1,4 @@
+from src.dto.company_dto import CompanyDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
 from src.models.validators.functions import not_empty
@@ -81,3 +82,18 @@ class CompanyModel(AbstractModel):
     @validate_setter(str, 5)
     def ownership(self, value: str):
         self._ownership = value
+
+    @staticmethod
+    def from_dto(dto: CompanyDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра CompanyModel из dto
+        """
+        item = CompanyModel()
+        item.id = dto.id
+        item.name = dto.name
+        item.inn = dto.inn
+        item.account = dto.account
+        item.corr_account = dto.corr_account
+        item.bik = dto.bik
+        item.ownership = dto.ownership
+        return item

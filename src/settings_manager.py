@@ -2,9 +2,10 @@ import os.path
 
 from src.core.functions import load_json
 from src.core.singletone import Singleton
+from src.dto.company_dto import CompanyDto
+from src.dto.functions import create_dto
 from src.models.company import CompanyModel
 from src.models.settings import SettingsModel
-from src.models.utils.model_loader import load_from_dict
 
 
 ####################################################
@@ -40,7 +41,7 @@ class SettingsManager(metaclass=Singleton):
     # Загрузить настройки из Json файла
     def load(self):
         data = load_json(self.__file_name)
-        load_from_dict(self.__settings.company, data["company"])
+        self.__settings.company = CompanyModel.from_dto(create_dto(CompanyDto, data["company"]), {})
 
     # Параметры настроек по умолчанию
     def set_default(self):

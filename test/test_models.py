@@ -2,7 +2,13 @@ import os.path
 import shutil
 import tempfile
 import uuid
+from dataclasses import dataclass, field
 
+from src.dto.abstract_dto import AbstractDto
+from src.dto.cached_id import CachedId
+from src.dto.company_dto import CompanyDto
+from src.dto.functions import create_dto
+from src.dto.measurement_dto import MeasurementUnitDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
@@ -10,31 +16,11 @@ from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
 from src.models.storage import StorageModel
-from src.models.utils.model_loader import load_from_dict
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
 from src.models.company import CompanyModel
-from src.models.utils import model_loader
 
 import pytest
-
-
-class ChildTestModel(AbstractModel):
-    """
-    Класс тестовой модели для тестов
-    """
-    id: str = ""
-    name: str = ""
-
-
-class ParentTestModel(AbstractModel):
-    """
-    Класс тестовой модели для тестов
-    """
-    id: str = ""
-    name: str = ""
-    child: ChildTestModel = None
-    children: list[ChildTestModel] = None
 
 class TestModels:
     """
@@ -139,6 +125,7 @@ class TestModels:
         Все поля должны быть установлены согласно словарю.
         """
         data = {
+            "id": "c4546e8b-7260-4db8-a673-c8c123ab14a7",
             "name": "ООО Ромашка",
             "inn": "123456789012",
             "account": "12345678901",
@@ -146,10 +133,9 @@ class TestModels:
             "bik": "123456789",
             "ownership": "00001"
         }
-        company = CompanyModel()
 
         # Действие
-        model_loader.load_from_dict(company, data)
+        company = CompanyModel.from_dto(create_dto(CompanyDto, data), {})
 
         # Проверки
         assert company.name == data["name"]
@@ -193,13 +179,13 @@ class TestModels:
         Проверяет обработку ошибок при загрузке CompanyModel из некорректного аргумента.
         Ожидается выброс ArgumentException при None или неправильном типе данных.
         """
-        company = CompanyModel()
+
         with pytest.raises(ArgumentException) as exc_info:
-            model_loader.load_from_dict(company, None)
+            company = CompanyModel.from_dto(create_dto(CompanyDto, None), {})
         assert exc_info.value.args[0] == "Пустой аргумент"
 
         with pytest.raises(ArgumentException) as exc_info:
-            model_loader.load_from_dict(company,["name"])
+            company = CompanyModel.from_dto(create_dto(CompanyDto, ["name"]), {})
         assert exc_info.value.args[0].startswith("Некорректный тип")
 
     # Параметры для тестирования некорректных значений полей компании
@@ -227,6 +213,7 @@ class TestModels:
         Проверяет, что при неверных данных выбрасывается RuntimeError с правильной причиной.
         """
         data = {
+            "id": "c4546e8b-7260-4db8-a673-c8c123ab14a7",
             "name": "ООО Ромашка",
             "inn": "123456789012",
             "account": "12345678901",
@@ -236,10 +223,8 @@ class TestModels:
             field: value
         }
 
-        company = CompanyModel()
-
         with pytest.raises(RuntimeError) as exc_info:
-            model_loader.load_from_dict(company,data)
+            company = CompanyModel.from_dto(create_dto(CompanyDto, data), {})
 
         assert exc_info.value.args[0] == f"Setter '{field}' не выполнился"
         caused_exc = exc_info.value.__cause__
@@ -460,68 +445,63 @@ class TestModels:
         with pytest.raises(RuntimeError):
             ingredient.unit = "not_a_unit"
 
-    def test_load_from_dict_basic_and_relations(self):
-        """
-        Проверяет корректную загрузку простых полей и связей между объектами:
-        - Простое поле parent.child ссылается на объект из created_models.
-        - Список parent.children ссылается на несколько объектов из created_models.
-        """
-        # Генерация id
-        id_c1 = str(uuid.uuid4())
-        id_c2 = str(uuid.uuid4())
-
-        # Подготовка created_models
-        child1 = ChildTestModel()
-        child1.id = id_c1
-        child1.name = "Child 1"
-
-        child2 = ChildTestModel()
-        child2.id = id_c2
-        child2.name = "Child 2"
-
-        created_models = {id_c1: child1, id_c2: child2}
-
-        # Данные для загрузки
-        data = {
-            "id": str(uuid.uuid4()),
-            "name": "Parent",
-            "child": {"id": id_c1},
-            "children": [{"id": id_c1}, {"id": id_c2}]
+    # Проверить фабричный метод создания модели из dto
+    def test_create_model_from_dto_measurementunit(self):
+        # Подготовка
+        g_d = {
+            "id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+            "name": "Грамм",
+            "conversion_factor": 1.0
         }
+        kg_d = {
+            "id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
+            "name": "Килограмм",
+            "base_unit": {
+                "id": "adb7510f-687d-428f-a697-26e53d3f65b7"
+            },
+            "conversion_factor": 1000.0
+        }
+        g_dto = create_dto(MeasurementUnitDto, g_d)
+        kg_dto: MeasurementUnitDto = create_dto(MeasurementUnitDto, kg_d)
 
-        parent = ParentTestModel()
-        load_from_dict(parent, data, created_models)
+        # Действие
+        g = MeasurementUnitModel.from_dto(g_dto, {})
+        kg = MeasurementUnitModel.from_dto(kg_dto, {"adb7510f-687d-428f-a697-26e53d3f65b7": g})
 
-        # Проверки
-        assert parent.child is child1
-        assert parent.children == [child1, child2]
+        # Проверка
+        assert kg.id == "a33dd457-36a8-4de6-b5f1-40afa6193346"
+        assert kg.name == "Килограмм"
+        assert kg.conversion_factor == 1000.0
+        assert kg.base_unit == g
 
-    def test_load_from_dict_missing_id_key(self):
+    def test_create_model_from_dto_measurementunit_missing_id_key(self):
         """
         Проверяет, что выбрасывается KeyError, если в словаре,
         который должен ссылаться на объект, отсутствует 'id'.
         """
-        parent = ParentTestModel()
-        created_models = {}
-        data = {"child": {"name": "No ID"}}
 
+        # Подготовка
+        g_d = {
+            "id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+            "name": "Грамм",
+            "conversion_factor": 1.0
+        }
+        kg_d = {
+            "id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
+            "name": "Килограмм",
+            "base_unit": {
+                "id": "adb7510f-687d-428f-a697-26e53d3f65b7"
+            },
+            "conversion_factor": 1000.0
+        }
+        g_dto = create_dto(MeasurementUnitDto, g_d)
+        kg_dto: MeasurementUnitDto = create_dto(MeasurementUnitDto, kg_d)
+
+        # Проверка
         with pytest.raises(KeyError) as e:
-            load_from_dict(parent, data, created_models)
-        assert "Отсутствует 'id' в словаре" in e.value.args[0]
+            g = MeasurementUnitModel.from_dto(g_dto, {})
+            kg = MeasurementUnitModel.from_dto(kg_dto, {"113": g})
 
-    def test_load_from_dict_id_not_in_created_models(self):
-        """
-        Проверяет, что выбрасывается KeyError, если указанный 'id' в словаре
-        отсутствует в created_models.
-        """
-        parent = ParentTestModel()
-        created_models = {}
-        missing_id = str(uuid.uuid4())
-        data = {"child": {"id": missing_id}}
-
-        with pytest.raises(KeyError) as e:
-            load_from_dict(parent, data, created_models)
-        assert f"Не найден объект с id='{missing_id}'" in e.value.args[0]
 
 if __name__ == "__main__":
     pytest.main(['-v'])

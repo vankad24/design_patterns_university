@@ -1,5 +1,5 @@
 import uuid
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from src.models.validators.decorators import validate_setter
 
@@ -32,3 +32,7 @@ class AbstractModel(ABC):
         if isinstance(other, AbstractModel):
             return self.id == other.id
         return False
+
+    @staticmethod
+    def from_dto(dto, cache: dict):
+        pass

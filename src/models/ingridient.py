@@ -1,3 +1,4 @@
+from src.dto.ingridient_dto import IngredientDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
@@ -60,4 +61,22 @@ class IngredientModel(AbstractModel):
         item.product = product
         item.amount = amount
         item.unit = unit
+        return item
+
+    @staticmethod
+    def from_dto(dto: IngredientDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра IngredientModel из dto
+        """
+        item = IngredientModel()
+        item.id = dto.id
+        item.name = dto.name
+        item.amount = dto.amount
+
+        if dto.product is not None:
+            item.product = cache[dto.product.id]
+
+        if dto.unit is not None:
+            item.unit = cache[dto.unit.id]
+
         return item

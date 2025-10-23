@@ -1,3 +1,4 @@
+from src.dto.product_dto import ProductDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product_group import ProductGroupModel
@@ -77,4 +78,22 @@ class ProductModel(AbstractModel):
             item.unit = unit
         if group:
             item.group = group
+        return item
+
+    @staticmethod
+    def from_dto(dto: ProductDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра ProductModel из dto
+        """
+        item = ProductModel()
+        item.id = dto.id
+        item.name = dto.name
+        item.full_name = dto.full_name
+
+        if dto.unit is not None:
+            item.unit = cache[dto.unit.id]
+
+        if dto.group is not None:
+            item.group = cache[dto.group.id]
+
         return item
