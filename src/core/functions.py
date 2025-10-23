@@ -29,3 +29,14 @@ def get_type_hints_without_underscore(cls):
             start_index = 1
         result[key[start_index:]] = value
     return result
+
+
+def get_fields(source, is_common: bool = False) -> list:
+    if source is None:
+        raise ValueError("Некорректно переданы аргументы!")
+
+    return list(filter(lambda x: not x.startswith("_"), dir(source)))
+
+
+def load_fields_from_dict():
+    ...
