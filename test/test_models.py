@@ -267,19 +267,19 @@ class TestModels:
         """
         Проверяет создание единиц измерения и правильность установки базовой единицы.
         """
-        gram = MeasurementUnitModel("грамм", 1.0)
-        kg = MeasurementUnitModel("кг", 1000.0, gram)
+        gram = MeasurementUnitModel.create("грамм", 1.0)
+        kg = MeasurementUnitModel.create("кг", 1000.0, gram)
 
-        assert gram.base_unit == gram
+        assert gram.base_unit is None
         assert kg.base_unit == gram
 
     def test_convert_measurement_unit_chain_conversion(self):
         """
         Проверяет корректность цепочки конверсий между единицами измерения.
         """
-        gram = MeasurementUnitModel("грамм", 1.0)
-        kg = MeasurementUnitModel("кг", 1000.0, gram)
-        ton = MeasurementUnitModel("т", 1000.0, kg)
+        gram = MeasurementUnitModel.create("грамм", 1.0)
+        kg = MeasurementUnitModel.create("кг", 1000.0, gram)
+        ton = MeasurementUnitModel.create("т", 1000.0, kg)
 
         assert ton.convert_to(2, gram) == 2_000_000
         assert kg.convert_to(5, gram) == 5000
@@ -298,7 +298,7 @@ class TestModels:
         long_name = "a" * 50
         long_full_name = "a" * 255
 
-        unit = MeasurementUnitModel("шт", 1.0)
+        unit = MeasurementUnitModel.create("шт", 1.0)
         product = ProductModel()
         product.code = "P001"
         product.name = long_name
@@ -353,8 +353,8 @@ class TestModels:
         group = ProductGroupModel()
         group.name = "Продукты питания"
 
-        unit_g = MeasurementUnitModel("грамм", 1.0)
-        unit_piece = MeasurementUnitModel("шт", 1.0)
+        unit_g = MeasurementUnitModel.create("грамм", 1.0)
+        unit_piece = MeasurementUnitModel.create("шт", 1.0)
 
         flour = ProductModel()
         flour.name = "Мука"

@@ -4,8 +4,8 @@ from src.core.response_format import ResponseFormat
 
 
 class ResponseCsv(AbstractResponse):
-    def build(self, r_format: ResponseFormat, data: list):
-        text = super().build(r_format, data)
+    def build(self, data: list):
+        text = super().build(data)
 
         # Шапка
         item = data[0]

@@ -1,5 +1,5 @@
 from src.core.abstract_response import AbstractResponse
-from src.logics.response_csv import ResponseCsv
+from src.logics.responses.response_csv import ResponseCsv
 from src.models.validators.exceptions import OperationException
 
 

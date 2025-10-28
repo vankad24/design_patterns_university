@@ -14,17 +14,8 @@ class MeasurementUnitModel(AbstractModel):
     # Коэффициент пересчета к базовой единице
     _conversion_factor: float = 1.0
 
-    def __init__(self, name: str="unknown", conversion_factor: float = 1.0, base_unit: "MeasurementUnitModel" = None):
-        """
-        Конструктор MeasurementUnitModel
-        :param name: название единицы измерения
-        :param conversion_factor: коэффициент пересчета к базовой единице
-        :param base_unit: ссылка на базовую единицу измерения
-        """
+    def __init__(self):
         super().__init__()
-        self.name = name
-        self.conversion_factor = conversion_factor
-        self.base_unit = base_unit if base_unit else self
 
     # --- Название ---
     @property
@@ -66,7 +57,7 @@ class MeasurementUnitModel(AbstractModel):
 
 
     @staticmethod
-    def create(name, base=None, factor=1.0):
+    def create(name, factor=1.0, base=None):
         """
         Фабричный метод для создания экземпляра класса
         """

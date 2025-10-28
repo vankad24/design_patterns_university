@@ -3,7 +3,8 @@ import pytest
 from src.core.abstract_response import AbstractResponse
 from src.core.response_format import ResponseFormat
 from src.logics.factory_entities import FactoryEntities
-from src.logics.response_csv import ResponseCsv
+from src.logics.responses.response_csv import ResponseCsv
+
 from src.models.product_group import ProductGroupModel
 
 
@@ -13,7 +14,7 @@ def test_create_response_csv_not_none():
     data = [ProductGroupModel.create("test")]
 
     # Действие
-    result = response.build(ResponseFormat.CSV, data)
+    result = response.build(data)
 
     # Проверки
     assert result is not None
@@ -28,7 +29,7 @@ def test_factory_create_not_none_create():
 
     instance = logic()
     assert isinstance(instance, AbstractResponse)
-    text = instance.build(ResponseFormat.CSV, data)
+    text = instance.build(data)
     assert len(text)>0
 
 

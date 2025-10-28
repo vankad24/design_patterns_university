@@ -31,12 +31,12 @@ def get_type_hints_without_underscore(cls):
     return result
 
 
-def get_fields(source, is_common: bool = False) -> list:
-    if source is None:
+def get_fields(obj) -> list:
+    if obj is None:
         raise ValueError("Некорректно переданы аргументы!")
 
-    return list(filter(lambda x: not x.startswith("_"), dir(source)))
-
+    return obj.__dict__
+#     fields = list(filter(lambda x: not x.startswith("_") and not callable(getattr(first_model.__class__, x)), dir(first_model) ))
 
 def load_fields_from_dict():
     ...
