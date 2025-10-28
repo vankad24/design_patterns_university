@@ -1,9 +1,12 @@
-from src.core.abstract_response import AbstractResponse
+
 from src.core.functions import get_fields
-from src.core.response_format import ResponseFormat
+from src.logics.responses.abstract_response import AbstractResponse
 
 
-class ResponseCsv(AbstractResponse):
+class CsvResponse(AbstractResponse):
+    """Класс для формирования ответа в формате CSV"""
+
+    #метод формирования запроса
     def build(self, data: list):
         text = super().build(data)
 

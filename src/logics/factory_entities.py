@@ -1,11 +1,11 @@
 from src.core.abstract_response import AbstractResponse
-from src.logics.responses.response_csv import ResponseCsv
+from src.logics.responses.csv_response import CsvResponse
 from src.models.validators.exceptions import OperationException
 
 
 class FactoryEntities:
     _match = {
-        "csv": ResponseCsv
+        "csv": CsvResponse
     }
 
     def create(self, r_format: str) -> type[AbstractResponse]:
