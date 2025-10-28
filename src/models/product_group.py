@@ -1,3 +1,4 @@
+from src.dto.product_group_dto import ProductGroupDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
 from src.models.validators.functions import not_empty
@@ -31,4 +32,14 @@ class ProductGroupModel(AbstractModel):
         """
         item = ProductGroupModel()
         item.name = name
+        return item
+
+    @staticmethod
+    def from_dto(dto: ProductGroupDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра ProductGroupModel из dto
+        """
+        item = ProductGroupModel()
+        item.id = dto.id
+        item.name = dto.name
         return item

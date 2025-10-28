@@ -1,3 +1,4 @@
+from src.dto.measurement_dto import MeasurementUnitDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
 from src.models.validators.functions import not_empty, validate_val
@@ -13,17 +14,8 @@ class MeasurementUnitModel(AbstractModel):
     # Коэффициент пересчета к базовой единице
     _conversion_factor: float = 1.0
 
-    def __init__(self, name: str="unknown", conversion_factor: float = 1.0, base_unit: "MeasurementUnitModel" = None):
-        """
-        Конструктор MeasurementUnitModel
-        :param name: название единицы измерения
-        :param conversion_factor: коэффициент пересчета к базовой единице
-        :param base_unit: ссылка на базовую единицу измерения
-        """
+    def __init__(self):
         super().__init__()
-        self.name = name
-        self.conversion_factor = conversion_factor
-        self.base_unit = base_unit if base_unit else self
 
     # --- Название ---
     @property
@@ -65,7 +57,7 @@ class MeasurementUnitModel(AbstractModel):
 
 
     @staticmethod
-    def create(name, base=None, factor=1.0):
+    def create(name, factor=1.0, base=None):
         """
         Фабричный метод для создания экземпляра класса
         """
@@ -75,5 +67,18 @@ class MeasurementUnitModel(AbstractModel):
             item.base_unit = base
         item.name = name
         item.conversion_factor = factor
+        return item
+
+    @staticmethod
+    def from_dto(dto: MeasurementUnitDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра MeasurementDto из dto
+        """
+        item = MeasurementUnitModel()
+        item.id = dto.id
+        item.name = dto.name
+        if dto.base_unit is not None:
+            item.base_unit = cache[dto.base_unit.id]
+        item.conversion_factor = dto.conversion_factor
         return item
 

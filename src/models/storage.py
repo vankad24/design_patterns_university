@@ -1,3 +1,4 @@
+from src.dto.storage_dto import StorageDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
 from src.models.validators.functions import not_empty
@@ -30,3 +31,14 @@ class StorageModel(AbstractModel):
     @validate_setter(str, check_func=not_empty)
     def address(self, value: str):
         self._address = value.strip()
+
+    @staticmethod
+    def from_dto(dto: StorageDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра StorageModel из dto
+        """
+        item = StorageModel()
+        item.id = dto.id
+        item.name = dto.name
+        item.address = dto.address
+        return item

@@ -1,3 +1,4 @@
+from src.dto.recipe_dto import RecipeDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.validators.decorators import validate_setter
@@ -79,4 +80,20 @@ class RecipeModel(AbstractModel):
             item.steps = steps
         if cooking_time:
             item.cooking_time = cooking_time
+        return item
+
+    @staticmethod
+    def from_dto(dto: RecipeDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра RecipeModel из dto
+        """
+        item = RecipeModel()
+        item.id = dto.id
+        item.name = dto.name
+        item.cooking_time = dto.cooking_time
+        item.steps = dto.steps
+
+        # Преобразование списка CachedId в список IngredientModel
+        item.ingredients = [cache[ingredient_id.id] for ingredient_id in dto.ingredients]
+
         return item

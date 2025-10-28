@@ -1,6 +1,6 @@
 import pytest
 
-from src.models.utils.model_loader import recipe_to_markdown
+from src.models.functions import recipe_to_markdown
 from src.repository import RepoKeys
 from src.start_service import StartService
 
