@@ -7,14 +7,25 @@ class CsvResponse(AbstractResponse):
     """Класс для формирования ответа в формате CSV"""
 
     #метод формирования запроса
-    def build(self, data: list):
-        text = super().build(data)
+    @classmethod
+    def build(cls, data: list):
+        super().build(data)
+        if not data:
+            return ""
 
         # Шапка
-        item = data[0]
-        fields = get_fields(item)
-        for filed in fields:
-            text+=f"{filed};"
+        result = []
+        fields = get_fields(data[0])
+        result.append(list(fields.keys()))
 
         # Данные
+        for item in data:
+            temp = []
+            for field in fields:
+                temp.append(str(getattr(item, field)))
+            result.append(temp)
+
+        text = ""
+        for row in result:
+            text+=";".join(row)+'\n'
         return text

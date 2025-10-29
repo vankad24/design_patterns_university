@@ -1,16 +1,16 @@
 import pytest
 
-from src.core.abstract_response import AbstractResponse
-from src.core.response_format import ResponseFormat
 from src.logics.factory_entities import FactoryEntities
-from src.logics.responses.response_csv import ResponseCsv
+from src.logics.responses.abstract_response import AbstractResponse
+from src.logics.responses.csv_response import CsvResponse
+from src.logics.responses.response_format import ResponseFormat
 
 from src.models.product_group import ProductGroupModel
 
 
 def test_create_response_csv_not_none():
     # Подготовка
-    response = ResponseCsv()
+    response = CsvResponse()
     data = [ProductGroupModel.create("test")]
 
     # Действие
