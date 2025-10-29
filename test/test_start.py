@@ -5,6 +5,7 @@ from src.repository import RepoKeys
 from src.start_service import StartService
 
 class TestStartService:
+    StartService().set_path('../settings.json')
     StartService().start()
 
     @pytest.fixture

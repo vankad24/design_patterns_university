@@ -13,6 +13,7 @@ from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
+from src.models.validators.functions import validate_val
 
 from src.repository import Repository, RepoKeys
 
@@ -39,11 +40,15 @@ class StartService(metaclass=Singleton):
         - Устанавливает путь к JSON-файлу с данными.
         """
         self.__loaded_data = None
-        self.__filepath = '../settings.json'
+        self.__filepath = './settings.json'
         self.__repo = Repository()
         self.__cached_models = {}
         for key in RepoKeys:
             self.__cached_models[str(key)] = {}
+
+    def set_path(self, path):
+        validate_val(path, str)
+        self.__filepath = path
 
     # --- Репозиторий ---
     @property

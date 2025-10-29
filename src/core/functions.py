@@ -31,12 +31,16 @@ def get_type_hints_without_underscore(cls):
     return result
 
 
-def get_fields(obj) -> list:
+def get_fields(obj, include_private=False, include_callable=False):
     if obj is None:
         raise ValueError("Некорректно переданы аргументы!")
 
-    return obj.__dict__
-#     fields = list(filter(lambda x: not x.startswith("_") and not callable(getattr(first_model.__class__, x)), dir(first_model) ))
+    result = dict()
+    for key in dir(obj):
+        value = getattr(obj, key)
+        if (not key.startswith("_") or include_private) and (not callable(value) or include_callable):
+            result[key] = value
+    return result
 
 def load_fields_from_dict():
     ...

@@ -1,4 +1,4 @@
-from src.core.response_format import ResponseFormat
+from src.logics.responses.response_format import ResponseFormat
 from src.models.company import CompanyModel
 from src.models.validators.decorators import validate_setter
 
