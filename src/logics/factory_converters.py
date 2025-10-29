@@ -1,6 +1,8 @@
 
 from datetime import datetime
 from collections.abc import Iterable
+from types import NoneType
+
 from src.logics.converters.abstract_converter import AbstractConverter
 from src.logics.converters.basic_converter import BasicConverter
 from src.logics.converters.datetime_converter import DatetimeConverter
@@ -14,7 +16,7 @@ from src.models.validators.exceptions import ArgumentException
 class FactoryConverters:
     @staticmethod
     def get_converter(t: type) -> AbstractConverter:
-        if t is None or issubclass(t, (bool, int, float, str)):
+        if issubclass(t, (bool, int, float, str, NoneType)):
             return BasicConverter()
         elif issubclass(t, (datetime,)):
             return DatetimeConverter()
