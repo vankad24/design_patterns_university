@@ -70,6 +70,7 @@ class TestModels:
         """
         Проверяет загрузку данных CompanyModel из JSON файла по абсолютному пути.
         """
+        # Подготовка
         file_name = os.path.abspath('test_settings.json')
         manager = SettingsManager()
         manager.file_name = file_name
