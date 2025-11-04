@@ -30,7 +30,7 @@ def validate_val(value, check_type, check_len=None, check_func=None):
 
     # Проверка длины
     if check_len is not None and len(value) != check_len:
-        raise ArgumentException("Некорректная длина аргумента")
+        raise ArgumentException(f"Некорректная длина аргумента. Ожидалась длина {check_len}, текущая длина {len(value)} для значения `{value}`")
 
     # Проверка через пользовательскую функцию
     if check_func is not None and not check_func(value):

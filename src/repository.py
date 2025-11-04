@@ -14,6 +14,7 @@ class RepoKeys(StrEnum):
     INGREDIENTS = "ingredients"
     RECIPES = "recipes"
     STORAGES = "storages"
+    TRANSACTIONS = "transactions"
 
 
 class Repository(metaclass=Singleton):
