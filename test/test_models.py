@@ -504,5 +504,41 @@ class TestModels:
             kg = MeasurementUnitModel.from_dto(kg_dto, {"113": g})
 
 
+    def test_model_to_dto_from_dto(self):
+        """
+        Проверяет корректность перевода модели в Dto.
+        """
+        # Подготовка
+        g_d = {
+            "id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+            "name": "Грамм",
+            "conversion_factor": 1.0
+        }
+        kg_d = {
+            "id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
+            "name": "Килограмм",
+            "base_unit": {
+                "id": "adb7510f-687d-428f-a697-26e53d3f65b7"
+            },
+            "conversion_factor": 1000.0
+        }
+        g_dto = create_dto(MeasurementUnitDto, g_d)
+        kg_dto: MeasurementUnitDto = create_dto(MeasurementUnitDto, kg_d)
+
+        g = MeasurementUnitModel.from_dto(g_dto, {})
+        kg = MeasurementUnitModel.from_dto(kg_dto, {"adb7510f-687d-428f-a697-26e53d3f65b7": g})
+
+        # Действие
+        converted_kg_dto = kg.to_dto()
+        converted_g_dto = g.to_dto()
+
+        # Проверка
+        assert g_dto == converted_g_dto
+        assert kg_dto == converted_kg_dto
+        assert kg_dto.base_unit.id == g_dto.id
+
+
+
+
 if __name__ == "__main__":
     pytest.main(['-v'])

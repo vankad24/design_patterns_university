@@ -8,6 +8,13 @@
         "bik": "123456789",
         "ownership": "00001"
     },
+    "storages":[
+            {
+                "name":"Общий склад",
+                "id":"7dc27e96-e6ad-4e5e-8c56-84e00667e3d7",
+                "address":"ул. Нижняя Набережная, 6"
+            }
+    ],
     "measurement_units": [
         {
             "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",

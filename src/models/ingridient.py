@@ -1,3 +1,4 @@
+from src.dto.cached_id import CachedId
 from src.dto.ingridient_dto import IngredientDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
@@ -80,3 +81,18 @@ class IngredientModel(AbstractModel):
             item.unit = cache[dto.unit.id]
 
         return item
+
+    """
+        Перевести доменную модель в DTO
+        """
+
+    def to_dto(self) -> IngredientDto:
+        return IngredientDto(
+            self._id,
+            "",
+            # Заменяем вложенную модель _product на CachedId(id)
+            self._product and CachedId(self._product.id),
+            self._amount,
+            # Заменяем вложенную модель _unit на CachedId(id)
+            self._unit and CachedId(self._unit.id)
+        )

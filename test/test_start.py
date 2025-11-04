@@ -122,5 +122,16 @@ class TestStartService:
         with open("Recipes.md", "w", encoding='utf-8') as f:
             f.write(result_md)
 
+    def test_storages_created(self, service):
+        """Проверяет, что все стандартные склады созданы"""
+        # Подготовка
+        storages = service.repo.data[RepoKeys.STORAGES]
+        # Действие
+        storage = storages["7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"]
+
+        # Проверка
+        assert storage.name == "Общий склад"
+        assert storage.address == "ул. Нижняя Набережная, 6"
+
 if __name__ == "__main__":
     pytest.main(['-v'])

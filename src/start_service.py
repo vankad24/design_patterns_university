@@ -7,12 +7,14 @@ from src.dto.measurement_dto import MeasurementUnitDto
 from src.dto.product_dto import ProductDto
 from src.dto.product_group_dto import ProductGroupDto
 from src.dto.recipe_dto import RecipeDto
+from src.dto.storage_dto import StorageDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
+from src.models.storage import StorageModel
 from src.models.validators.functions import validate_val
 
 from src.repository import Repository, RepoKeys
@@ -94,3 +96,4 @@ class StartService(metaclass=Singleton):
         self.create_models_from_loaded(RepoKeys.PRODUCTS, ProductModel, ProductDto)
         self.create_models_from_loaded(RepoKeys.INGREDIENTS, IngredientModel, IngredientDto)
         self.create_models_from_loaded(RepoKeys.RECIPES, RecipeModel, RecipeDto)
+        self.create_models_from_loaded(RepoKeys.STORAGES, StorageModel, StorageDto)

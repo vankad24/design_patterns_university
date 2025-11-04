@@ -42,3 +42,13 @@ class StorageModel(AbstractModel):
         item.name = dto.name
         item.address = dto.address
         return item
+
+    """
+    Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> StorageDto:
+        return StorageDto(
+            self._id,
+            self._name,
+            self._address
+        )

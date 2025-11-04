@@ -41,3 +41,7 @@ class AbstractModel(ABC):
     @staticmethod
     def from_dto(dto, cache: dict):
         pass
+
+    # Отдельный общий метод для формирования Dto структуры
+    def to_dto(self):
+        pass
