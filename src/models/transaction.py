@@ -8,7 +8,7 @@ from src.models.product import ProductModel
 from src.models.storage import StorageModel
 from src.models.validators.decorators import validate_setter
 
-
+# Модель транзикций
 class TransactionModel(AbstractModel):
     _period: datetime = None
     _value: float = 0.0
@@ -37,7 +37,7 @@ class TransactionModel(AbstractModel):
         return self._value
 
     @value.setter
-    @validate_setter(float, check_func=lambda x: x>0)
+    @validate_setter(float)
     def value(self, value: float):
         self._value = value
 

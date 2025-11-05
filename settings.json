@@ -1,4 +1,6 @@
 {
+    "first_start": true,
+    "default_response_format": "json",
     "company": {
         "id": "c4546e8b-7260-4db8-a673-c8c123ab14a5",
         "name": "Рога и копыта",
@@ -31,7 +33,7 @@
                 }
             },
             {
-                "id": "0218470a-dde4-407c-9360-93bb1c3d15e7",
+                "id": "0218470a-dde4-407c-9360-93bb1c3d15e8",
                 "period": "2025-01-05",
                 "value": -3.0,
                 "unit": {
@@ -45,7 +47,7 @@
                 }
             },
             {
-                "id": "0218470a-dde4-407c-9360-93bb1c3d15e7",
+                "id": "0218470a-dde4-407c-9360-93bb1c3d15e9",
                 "period": "2025-01-12",
                 "value": -10.0,
                 "unit": {
@@ -73,7 +75,7 @@
                 }
             },
             {
-                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7b",
+                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7c",
                 "period": "2025-01-20",
                 "value": -0.5,
                 "unit": {
@@ -87,7 +89,7 @@
                 }
             },
             {
-                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7b",
+                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7d",
                 "period": "2025-01-24",
                 "value": -1.2,
                 "unit": {

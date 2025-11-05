@@ -15,11 +15,14 @@ from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
+from src.models.settings import SettingsModel
 from src.models.storage import StorageModel
 from src.models.transaction import TransactionModel
 from src.models.validators.functions import validate_val
 
 from src.repository import Repository, RepoKeys
+from src.settings_manager import SettingsManager
+
 
 class StartService(metaclass=Singleton):
     """
@@ -36,7 +39,7 @@ class StartService(metaclass=Singleton):
     __cached_models: dict
     __repo: Repository
 
-    def __init__(self):
+    def __init__(self, path='./settings.json'):
         """
         Инициализация сервиса:
         - Загружает ссылку на репозиторий.
@@ -44,15 +47,13 @@ class StartService(metaclass=Singleton):
         - Устанавливает путь к JSON-файлу с данными.
         """
         self.__loaded_data = None
-        self.__filepath = './settings.json'
+        self.__filepath = path
         self.__repo = Repository()
         self.__cached_models = {}
         for key in RepoKeys:
             self.__cached_models[str(key)] = {}
-
-    def set_path(self, path):
-        validate_val(path, str)
-        self.__filepath = path
+        if SettingsManager().settings.first_start:
+            self.start()
 
     # --- Репозиторий ---
     @property
