@@ -3,6 +3,7 @@ from datetime import datetime
 import connexion
 from flask import request
 
+from src.core.functions import dump_json
 from src.logics.factory_converters import FactoryConverters
 from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.error_response import ErrorResponse
@@ -10,10 +11,12 @@ from src.logics.responses.json_response import JsonResponse
 from src.logics.responses.response_format import ResponseFormat
 from src.logics.turnover_balance_sheet import TurnoverBalanceSheet
 from src.repository import RepoKeys, Repository
+from src.settings_manager import SettingsManager
 from src.start_service import StartService
 
 start_service = StartService()
 repository = Repository()
+settings_manager = SettingsManager()
 
 app = connexion.FlaskApp(__name__)
 
@@ -85,11 +88,11 @@ def get_tbs(storage_id: str):
     if start_date >= end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
-    items = TurnoverBalanceSheet.calculate(repository.data[RepoKeys.TRANSACTIONS].values(), storage, start_date, end_date)
+    items = TurnoverBalanceSheet.calculate(repository.data[RepoKeys.TRANSACTIONS].values(), repository.data[RepoKeys.PRODUCTS], storage, start_date, end_date)
 
     return FactoryEntities().create(ResponseFormat.JSON).build(items)
 
-@app.route("/api/repository/all", methods=['POST'])
+@app.route("/api/repository/all", methods=['POST', 'GET'])
 def get_all_from_repository():
     """
     JSON со всеми данными из Repository
@@ -97,6 +100,21 @@ def get_all_from_repository():
     data = FactoryConverters.convert(repository.data)
     return JsonResponse.build(data)
 
+@app.route("/api/save_all", methods=['POST', 'GET'])
+def save_all():
+    """
+    Сохранить все данныые в файл
+    """
+    dicts = [
+        settings_manager.dump(),
+        repository.dump()
+    ]
+    dumped_dict = {}
+    for d in dicts:
+        dumped_dict.update(d)
+    data = FactoryConverters.convert(dumped_dict)
+    dump_json(data, settings_manager.file_name)
+    return JsonResponse.build([{"status":"ok"}])
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080)

@@ -7,6 +7,9 @@ from src.models.validators.functions import not_empty
 ###############################################
 # Модель склада
 class StorageModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = StorageDto
+
     # Наименование склада
     _name: str = ""
     # Адрес склада

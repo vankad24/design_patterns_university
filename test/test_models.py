@@ -183,7 +183,7 @@ class TestModels:
 
         with pytest.raises(ArgumentException) as exc_info:
             company = CompanyModel.from_dto(create_dto(CompanyDto, None), {})
-        assert exc_info.value.args[0] == "Пустой аргумент"
+        assert exc_info.value.args[0] == "Аргумент со значением None!"
 
         with pytest.raises(ArgumentException) as exc_info:
             company = CompanyModel.from_dto(create_dto(CompanyDto, ["name"]), {})

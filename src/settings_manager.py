@@ -1,9 +1,11 @@
 import os.path
+from dataclasses import asdict
 
 from src.core.functions import load_json
 from src.core.singletone import Singleton
 from src.dto.company_dto import CompanyDto
 from src.dto.functions import create_dto
+from src.dto.settings_dto import SettingsDto
 from src.logics.responses.response_format import ResponseFormat
 from src.models.company import CompanyModel
 from src.models.settings import SettingsModel
@@ -13,10 +15,14 @@ from src.models.settings import SettingsModel
 # Менеджер настроек.
 # Предназначен для управления настройками и хранения параметров приложения
 class SettingsManager(metaclass=Singleton):
-    __file_name: str = ""
+    __file_name: str = "./settings.json"
     __settings: SettingsModel = None
 
+    # ключ для сохранения в конфиг
+    CONFIG_KEY = "settings"
+
     def __init__(self):
+
         self.set_default()
 
     @property
@@ -41,10 +47,11 @@ class SettingsManager(metaclass=Singleton):
 
     # Загрузить настройки из Json файла
     def load(self):
-        data = load_json(self.__file_name)
-        self.__settings.company = CompanyModel.from_dto(create_dto(CompanyDto, data["company"]), {})
-        self.__settings.default_response_format = ResponseFormat(data.get("default_response_format", "json"))
-        self.__settings.first_start = data.get("first_start", True)
+        data = load_json(self.__file_name)[self.CONFIG_KEY]
+        self.__settings = SettingsModel.from_dto(create_dto(SettingsDto, data), {})
+
+    def dump(self) -> dict:
+        return {self.CONFIG_KEY: asdict(self.__settings.to_dto())}
 
     # Параметры настроек по умолчанию
     def set_default(self):
@@ -58,3 +65,4 @@ class SettingsManager(metaclass=Singleton):
 
         self.__settings = SettingsModel()
         self.__settings.company = c
+

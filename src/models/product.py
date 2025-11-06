@@ -12,6 +12,9 @@ class ProductModel(AbstractModel):
     def __init__(self):
         super().__init__()
 
+    # соответствующий модели dto класс
+    DTO_CLASS = ProductDto
+
     # Название номенклатуры (до 50 символов)
     _name: str = ""
     # Полное наименование (до 255 символов)
@@ -100,7 +103,7 @@ class ProductModel(AbstractModel):
         return item
 
     """
-    Перевести домсенную модель в Dto
+    Перевести доменную модель в Dto
     """
     def to_dto(self) -> ProductDto:
         return ProductDto(self._id,

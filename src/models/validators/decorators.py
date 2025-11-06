@@ -1,4 +1,4 @@
-def validate_setter(check_type, check_len=None, check_func=None):
+def validate_setter(check_type, check_len=None, check_func=None, none_allowed=False):
     """
     Декоратор для сеттеров, который проверяет тип, длину и/или дополнительную функцию валидации.
 
@@ -6,6 +6,7 @@ def validate_setter(check_type, check_len=None, check_func=None):
         check_type: ожидаемый тип значения.
         check_len: необязательная конкретная длина значения.
         check_func: необязательная функция для дополнительной проверки.
+        none_allowed: если указано False, проверяется, чтобы значение было не None
     """
 
     def decorator(setter_func):
@@ -14,7 +15,7 @@ def validate_setter(check_type, check_len=None, check_func=None):
         def wrapper(self, value):
             try:
                 from src.models.validators.functions import validate_val
-                validate_val(value, check_type, check_len, check_func)
+                validate_val(value, check_type, check_len, check_func, none_allowed)
             except Exception as e:
                 raise RuntimeError(f"Setter '{setter_name}' не выполнился") from e
             setter_func(self, value)

@@ -11,6 +11,16 @@ def load_json(file_name):
     with open(file_name.strip(), 'r', encoding='utf-8') as file:
         return json.load(file)
 
+def dump_json(data, file_name):
+    """
+    Сохраняет JSON-данные в файл.
+
+    :param data: загружаемые данные
+    :param file_name: путь к файлу JSON (строка). Пробелы по краям автоматически убираются.
+    """
+    with open(file_name.strip(), 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False)
+
 
 def get_type_hints_without_underscore(cls):
     """

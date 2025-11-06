@@ -10,6 +10,9 @@ class ProductGroupModel(AbstractModel):
     def __init__(self):
         super().__init__()
 
+    # соответствующий модели dto класс
+    DTO_CLASS = ProductGroupDto
+
     # Наименование группы
     _name: str = ""
 

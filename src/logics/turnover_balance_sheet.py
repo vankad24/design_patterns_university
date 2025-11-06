@@ -29,7 +29,7 @@ class TurnoverBalanceItem:
 class TurnoverBalanceSheet:
     # Функция подсчёта сальдовой ведомости по продуктам для конкретного склада
     @staticmethod
-    def calculate(all_transactions: list[TransactionModel], storage, start_date: datetime, end_date: datetime):
+    def calculate(all_transactions: list[TransactionModel], all_products: dict, storage, start_date: datetime, end_date: datetime):
         start = datetime(start_date.year, start_date.month, start_date.day)
         end = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
         turnover_balances: dict[str, TurnoverBalanceItem] = {}
@@ -55,4 +55,10 @@ class TurnoverBalanceSheet:
                         # Расходы
                         item.outflows += trans.value
 
-        return list(turnover_balances.values())
+        result = list(turnover_balances.values())
+        other_product_ids = set(all_products.keys()) - set(turnover_balances.keys())
+        for key in other_product_ids:
+            product = all_products[key]
+            result.append(TurnoverBalanceItem(storage, product, product.unit))
+
+        return result

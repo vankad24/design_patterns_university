@@ -4,11 +4,13 @@ import pytest
 
 from src.models.functions import recipe_to_markdown
 from src.repository import RepoKeys
+from src.settings_manager import SettingsManager
 from src.start_service import StartService
 
 class TestStartService:
     @pytest.fixture
     def service(self):
+        SettingsManager().settings.first_start = True
         return StartService('../settings.json')
 
     def test_units_created(self, service):

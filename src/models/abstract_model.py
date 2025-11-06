@@ -1,6 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 
+from src.dto.abstract_dto import AbstractDto
 from src.models.validators.decorators import validate_setter
 
 
@@ -8,6 +9,10 @@ class AbstractModel(ABC):
     """
     Абстрактный базовый класс для моделей с уникальным идентификатором.
     """
+
+    # соответствующий модели dto класс
+    DTO_CLASS = AbstractDto
+
     _id: str = ""
 
     def __init__(self):

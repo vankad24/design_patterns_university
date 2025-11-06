@@ -12,6 +12,9 @@ class IngredientModel(AbstractModel):
     def __init__(self):
         super().__init__()
 
+    # соответствующий модели dto класс
+    DTO_CLASS = IngredientDto
+
     # Продукт
     _product: ProductModel = None
     # Количество
@@ -71,7 +74,6 @@ class IngredientModel(AbstractModel):
         """
         item = IngredientModel()
         item.id = dto.id
-        item.name = dto.name
         item.amount = dto.amount
 
         if dto.product is not None:
@@ -83,13 +85,11 @@ class IngredientModel(AbstractModel):
         return item
 
     """
-        Перевести доменную модель в DTO
-        """
-
+    Перевести доменную модель в DTO
+    """
     def to_dto(self) -> IngredientDto:
         return IngredientDto(
             self._id,
-            "",
             # Заменяем вложенную модель _product на CachedId(id)
             self._product and CachedId(self._product.id),
             self._amount,

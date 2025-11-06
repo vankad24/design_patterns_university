@@ -10,6 +10,9 @@ from src.models.validators.decorators import validate_setter
 
 # Модель транзикций
 class TransactionModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = TransactionDto
+
     _period: datetime = None
     _value: float = 0.0
     _unit: MeasurementUnitModel = None
@@ -88,7 +91,7 @@ class TransactionModel(AbstractModel):
     def from_dto(dto: TransactionDto, cache: dict) -> "TransactionModel":
         item = TransactionModel()
         item.id = dto.id
-        item.period = datetime.strptime(dto.period, "%Y-%m-%d")
+        item.period = datetime.strptime(dto.period, "%Y-%m-%d")# "%Y-%m-%d %H:%M:%S"
         item.value = dto.value
 
         if dto.unit is not None:
@@ -103,7 +106,6 @@ class TransactionModel(AbstractModel):
     def to_dto(self) -> TransactionDto:
         return TransactionDto(
             self._id,
-            "",
             self._period.strftime("%Y-%m-%d"),
             self._value,
             self._unit and CachedId(self._unit.id),

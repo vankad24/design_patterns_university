@@ -9,6 +9,10 @@ from src.models.validators.functions import validate_val, not_empty
 ###############################################
 # Модель рецепта
 class RecipeModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = RecipeDto
+
+
     # Наименование рецепта
     _name: str = ""
     # Время приготовления

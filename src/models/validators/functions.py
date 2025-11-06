@@ -1,7 +1,7 @@
 from src.models.validators.exceptions import ArgumentException
 
 
-def validate_val(value, check_type, check_len=None, check_func=None):
+def validate_val(value, check_type, check_len=None, check_func=None, none_allowed=False):
     """
     Проверяет значение на корректность.
 
@@ -10,6 +10,7 @@ def validate_val(value, check_type, check_len=None, check_func=None):
     - check_type: тип или кортеж допустимых типов (например, int, str или (int, float))
     - check_len: если указано, проверяется точная длина (len(value) == check_len)
     - check_func: функция проверки, которая возвращает True, если значение корректно
+    - none_allowed: если указано False, проверяется, чтобы значение было не None
 
     Исключения:
     - ArgumentException: вызывается при несоответствии любого из условий
@@ -21,8 +22,8 @@ def validate_val(value, check_type, check_len=None, check_func=None):
     validate_val("123", str, check_func=str.isdigit)  # проверка через функцию
     """
 
-    if value is None:
-        raise ArgumentException("Пустой аргумент")
+    if not none_allowed and value is None:
+        raise ArgumentException("Аргумент со значением None!")
 
     # Проверка типа
     if not isinstance(value, check_type):

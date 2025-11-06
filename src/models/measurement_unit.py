@@ -8,6 +8,10 @@ from src.models.validators.functions import not_empty, validate_val
 ###############################################
 # Модель единицы измерения
 class MeasurementUnitModel(AbstractModel):
+
+    # соответствующий модели dto класс
+    DTO_CLASS = MeasurementUnitDto
+
     # Наименование единицы измерения
     _name: str = ""
     # Базовая единица измерения
@@ -35,7 +39,7 @@ class MeasurementUnitModel(AbstractModel):
 
     @base_unit.setter
     def base_unit(self, value: "MeasurementUnitModel"):
-        validate_val(value, MeasurementUnitModel)
+        validate_val(value, MeasurementUnitModel, none_allowed=True)
         self._base_unit = value
 
     # --- Коэффициент пересчета ---
