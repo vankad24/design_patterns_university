@@ -1,10 +1,10 @@
 from types import GenericAlias
-from src.core.functions import get_fields, get_type_hints_without_underscore
+
+from src.core.functions import get_type_hints_without_underscore
 from src.dto.abstract_dto import AbstractDto
-from src.dto.cached_id import CachedId
-from src.dto.measurement_dto import MeasurementUnitDto
 from src.models.validators.exceptions import OperationException
 from src.models.validators.functions import validate_val
+
 
 def create_dto(dto_class, data: dict):
     validate_val(data, dict)

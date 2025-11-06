@@ -1,7 +1,6 @@
-from dataclasses import dataclass
-from abc import abstractmethod
-
 import uuid
+from dataclasses import dataclass
+
 
 @dataclass
 class AbstractDto:

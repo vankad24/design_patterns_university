@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from src.dto.abstract_dto import AbstractDto
 from src.dto.cached_id import CachedId
 
-from dataclasses import dataclass
-from datetime import datetime
 
 @dataclass
 class TransactionDto(AbstractDto):

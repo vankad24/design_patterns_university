@@ -4,7 +4,6 @@ from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.abstract_response import AbstractResponse
 from src.logics.responses.csv_response import CsvResponse
 from src.logics.responses.response_format import ResponseFormat
-
 from src.models.product_group import ProductGroupModel
 
 

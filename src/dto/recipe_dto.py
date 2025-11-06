@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
+
 from src.dto.abstract_dto import AbstractDto
 from src.dto.cached_id import CachedId
+
 
 # класс dto для рецепта
 @dataclass

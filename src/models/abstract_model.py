@@ -1,5 +1,5 @@
 import uuid
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from src.dto.abstract_dto import AbstractDto
 from src.models.validators.decorators import validate_setter

@@ -7,6 +7,7 @@ from src.repository import RepoKeys
 from src.settings_manager import SettingsManager
 from src.start_service import StartService
 
+
 class TestStartService:
     @pytest.fixture
     def service(self):

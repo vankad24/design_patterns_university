@@ -11,6 +11,7 @@ from src.logics.factory_converters import FactoryConverters
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.validators.exceptions import ArgumentException
 
+
 @pytest.fixture
 def gr():
     unit = MeasurementUnitModel.create('gr')

@@ -8,6 +8,7 @@ from src.models.product import ProductModel
 from src.models.storage import StorageModel
 from src.models.validators.decorators import validate_setter
 
+
 # Модель транзикций
 class TransactionModel(AbstractModel):
     # соответствующий модели dto класс

@@ -4,6 +4,7 @@ from src.logics.responses.markdown_response import MarkdownResponse
 from src.repository import RepoKeys
 from src.start_service import StartService
 
+
 @pytest.fixture
 def service():
     return StartService('../settings.json')
