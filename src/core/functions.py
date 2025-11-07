@@ -42,6 +42,18 @@ def get_type_hints_without_underscore(cls):
 
 
 def get_fields(obj, include_private=False, include_callable=False):
+    """
+        Извлекает все атрибуты (поля и методы) из заданного объекта и возвращает их в виде словаря.
+
+        Позволяет фильтровать служебные (начинающиеся с '_') и вызываемые (методы) атрибуты
+        с помощью флагов 'include_private' и 'include_callable'.
+
+        :param obj: Объект, из которого нужно извлечь атрибуты.
+        :param include_private: Если True, включать атрибуты, начинающиеся с нижнего подчеркивания (например, _name).
+        :param include_callable: Если True, включать вызываемые атрибуты (методы).
+        :return: Словарь, где ключ — имя атрибута, а значение — его содержимое.
+        :raises ValueError: Если переданный объект None.
+    """
     if obj is None:
         raise ValueError("Некорректно переданы аргументы!")
 
@@ -51,6 +63,3 @@ def get_fields(obj, include_private=False, include_callable=False):
         if (not key.startswith("_") or include_private) and (not callable(value) or include_callable):
             result[key] = value
     return result
-
-def load_fields_from_dict():
-    ...

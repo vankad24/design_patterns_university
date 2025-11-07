@@ -7,6 +7,17 @@ from src.models.validators.functions import validate_val
 
 
 def create_dto(dto_class, data: dict):
+    """
+        Создает экземпляр объекта передачи данных (DTO) заданного класса
+        и заполняет его поля данными из словаря.
+
+        Поддерживает рекурсивное создание вложенных DTO (как одиночных, так и в списках).
+
+        :param dto_class: Класс DTO, который нужно создать (должен наследоваться от AbstractDto).
+        :param data: Словарь, содержащий данные для инициализации полей DTO.
+        :return: Инициализированный экземпляр dto_class.
+        :raises OperationException: В случае ошибки при загрузке или валидации данных.
+    """
     validate_val(data, dict)
     obj = dto_class()
     hint_types = get_type_hints_without_underscore(obj.__class__)

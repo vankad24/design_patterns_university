@@ -33,14 +33,23 @@ def status():
 
 @app.route("/api/responses/formats", methods=['GET'])
 def responses_formats():
+    """
+    Получить доступные форматы ответа
+    """
     return JsonResponse.build([str(v) for v in ResponseFormat])
 
 @app.route("/api/responses/models", methods=['GET'])
 def responses_models():
+    """
+    Получить доступные модели (типы данных) для ответа
+    """
     return JsonResponse.build([str(v) for v in RepoKeys])
 
 @app.route("/api/responses/build", methods=['GET'])
 def build_response():
+    """
+    Сформировать ответ по заданной модели и формату
+    """
     try:
         f = ResponseFormat(request.args.get('format'))
     except Exception as e:
@@ -58,12 +67,18 @@ def build_response():
 
 @app.route("/api/recipes", methods=['GET'])
 def get_recipes():
+    """
+    Получить список всех рецептов
+    """
     recipes = list(repository.data[RepoKeys.RECIPES].values())
     result = FactoryConverters.convert(recipes)
     return JsonResponse.build(result)
 
 @app.route("/api/recipes/<recipe_id>", methods=['GET'])
 def get_recipe(recipe_id: str):
+    """
+    Получить конкретный рецепт по ID
+    """
     try:
         recipe = repository.data[RepoKeys.RECIPES][recipe_id]
     except Exception as e:
@@ -98,7 +113,7 @@ def get_tbs(storage_id: str):
 @app.route("/api/repository/all", methods=['POST', 'GET'])
 def get_all_from_repository():
     """
-    JSON со всеми данными из Repository
+    Получить все данные из Repository в формате JSON
     """
     data = FactoryConverters.convert(repository.data)
     return JsonResponse.build(data)
@@ -106,7 +121,7 @@ def get_all_from_repository():
 @app.route("/api/save_all", methods=['POST', 'GET'])
 def save_all():
     """
-    Сохранить все данныые в файл
+    Сохранить все данные (settings и repository) в файл
     """
     dicts = [
         settings_manager.dump(),
@@ -118,6 +133,7 @@ def save_all():
     data = FactoryConverters.convert(dumped_dict)
     dump_json(data, settings_manager.file_name)
     return JsonResponse.build([{"status":"ok"}])
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080)

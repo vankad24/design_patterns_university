@@ -4,6 +4,7 @@ from src.dto.abstract_dto import AbstractDto
 from src.dto.cached_id import CachedId
 
 
+# класс dto для транзакций
 @dataclass
 class TransactionDto(AbstractDto):
     # Дата/период транзакции

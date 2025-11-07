@@ -80,6 +80,9 @@ class TransactionModel(AbstractModel):
     @staticmethod
     def create(period: datetime, value: float, unit_model: MeasurementUnitModel,
                product_model: ProductModel, storage_model: StorageModel) -> "TransactionModel":
+        """
+            Фабричный метод для создания экземпляра из dto
+        """
         item = TransactionModel()
         item.period = period
         item.value = value
@@ -104,6 +107,9 @@ class TransactionModel(AbstractModel):
 
         return item
 
+    """
+    Перевести доменную модель в DTO
+    """
     def to_dto(self) -> TransactionDto:
         return TransactionDto(
             self._id,

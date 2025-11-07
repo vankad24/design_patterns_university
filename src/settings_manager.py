@@ -48,6 +48,7 @@ class SettingsManager(metaclass=Singleton):
         data = load_json(self.__file_name)[self.CONFIG_KEY]
         self.__settings = SettingsModel.from_dto(create_dto(SettingsDto, data), {})
 
+    # Выгрузить настройки в словарь
     def dump(self) -> dict:
         return {self.CONFIG_KEY: asdict(self.__settings.to_dto())}
 

@@ -49,6 +49,6 @@ class Repository(metaclass=Singleton):
 
     def dump(self) -> dict:
         """
-            Возвращает словарь с данными для сохранения
+            Возвращает словарь с данными для сохранения моделей
         """
         return {self.CONFIG_KEY: {key: map(lambda x: asdict(x.to_dto()), self.__data[key].values()) for key in self.__data}}

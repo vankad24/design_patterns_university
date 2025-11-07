@@ -36,6 +36,16 @@ class StorageModel(AbstractModel):
         self._address = value.strip()
 
     @staticmethod
+    def create(name: str, address: str):
+        """
+            Фабричный метод для создания экземпляра из dto
+        """
+        item = StorageModel()
+        item.name = name
+        item.address = address
+        return item
+
+    @staticmethod
     def from_dto(dto: StorageDto, cache: dict):
         """
             Фабричный метод для создания экземпляра StorageModel из dto
