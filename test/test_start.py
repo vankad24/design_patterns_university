@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from src.models.functions import recipe_to_markdown
@@ -5,12 +7,9 @@ from src.repository import RepoKeys
 from src.start_service import StartService
 
 class TestStartService:
-    StartService().set_path('../settings.json')
-    StartService().start()
-
     @pytest.fixture
     def service(self):
-        return StartService()
+        return StartService('../settings.json')
 
     def test_units_created(self, service):
         """Проверяет, что все стандартные единицы измерения созданы корректно
@@ -121,6 +120,38 @@ class TestStartService:
 
         with open("Recipes.md", "w", encoding='utf-8') as f:
             f.write(result_md)
+
+    def test_storages_created(self, service):
+        """Проверяет, что все стандартные склады созданы"""
+        # Подготовка
+        storages = service.repo.data[RepoKeys.STORAGES]
+        # Действие
+        storage = storages["7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"]
+
+        # Проверка
+        assert storage.name == "Общий склад"
+        assert storage.address == "ул. Нижняя Набережная, 6"
+
+    def test_transactions_created(self, service):
+        """Проверяет, что транзакции созданы"""
+        # Подготовка
+        transactions = service.repo.data[RepoKeys.TRANSACTIONS]
+        products = service.repo.data[RepoKeys.PRODUCTS]
+        units = service.repo.data[RepoKeys.MEASUREMENT_UNITS]
+        storages = service.repo.data[RepoKeys.STORAGES]
+
+        # Действие
+        transaction = transactions["0218470a-dde4-407c-9360-93bb1c3d15e7"]
+        unit = units["f8346e8b-7260-4db8-a673-c8c826ab08b7"]
+        product = products["e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"]
+        storage = storages["7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"]
+
+        # Проверка
+        assert transaction.period == datetime.datetime(2025,1,1)
+        assert transaction.value == 30.0
+        assert transaction.unit == unit
+        assert transaction.product == product
+        assert transaction.storage == storage
 
 if __name__ == "__main__":
     pytest.main(['-v'])

@@ -1,3 +1,4 @@
+from src.dto.cached_id import CachedId
 from src.dto.measurement_dto import MeasurementUnitDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
@@ -82,3 +83,14 @@ class MeasurementUnitModel(AbstractModel):
         item.conversion_factor = dto.conversion_factor
         return item
 
+    """
+    Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> MeasurementUnitDto:
+        return MeasurementUnitDto(
+            self._id,
+            self._name,
+            self._conversion_factor,
+            # Заменяем вложенную модель _base_unit на CachedId(id), если она существует
+            self._base_unit and CachedId(self._base_unit.id)
+        )

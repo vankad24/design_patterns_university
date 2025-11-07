@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import connexion
 from flask import request
 
@@ -6,11 +8,11 @@ from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.error_response import ErrorResponse
 from src.logics.responses.json_response import JsonResponse
 from src.logics.responses.response_format import ResponseFormat
+from src.logics.turnover_balance_sheet import TurnoverBalanceSheet
 from src.repository import RepoKeys, Repository
 from src.start_service import StartService
 
 start_service = StartService()
-start_service.start()
 repository = Repository()
 
 app = connexion.FlaskApp(__name__)
@@ -63,6 +65,37 @@ def get_recipe(recipe_id: str):
 
     result = FactoryConverters.convert(recipe)
     return JsonResponse.build(result)
+
+# Пример http://127.0.0.1:8080/api/tbs/7dc27e96-e6ad-4e5e-8c56-84e00667e3d7?start_date=2025-01-02&end_date=2025-02-01
+@app.route("/api/tbs/<storage_id>", methods=['GET'])
+def get_tbs(storage_id: str):
+    """
+    Оборотно-сальдовая ведомость (Turnover balance sheet)
+    - `storage_id`: уникальный код склада
+    - `start_date`: начальная дата отчёта
+    - `end_date`: дата окончания отчёта
+    """
+    start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
+    end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d')
+
+    storage = start_service.repo.data[RepoKeys.STORAGES].get(storage_id)
+    if storage is None:
+        return ErrorResponse.build(f"Склад с id:'{storage_id}' не найден")
+
+    if start_date >= end_date:
+        return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
+
+    items = TurnoverBalanceSheet.calculate(repository.data[RepoKeys.TRANSACTIONS].values(), storage, start_date, end_date)
+
+    return FactoryEntities().create(ResponseFormat.JSON).build(items)
+
+@app.route("/api/repository/all", methods=['POST'])
+def get_all_from_repository():
+    """
+    JSON со всеми данными из Repository
+    """
+    data = FactoryConverters.convert(repository.data)
+    return JsonResponse.build(data)
 
 
 if __name__ == '__main__':

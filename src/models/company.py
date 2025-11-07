@@ -97,3 +97,17 @@ class CompanyModel(AbstractModel):
         item.bik = dto.bik
         item.ownership = dto.ownership
         return item
+
+    """
+    Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> CompanyDto:
+        return CompanyDto(
+            self._id,
+            self._name,
+            self._inn,
+            self._account,
+            self._corr_account,
+            self._bik,
+            self._ownership
+        )

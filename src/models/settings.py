@@ -8,6 +8,7 @@ from src.models.validators.decorators import validate_setter
 class SettingsModel:
     _company: CompanyModel = None
     _default_response_format: ResponseFormat = ResponseFormat.JSON
+    _first_start: bool = True
 
     # Организация
     @property
@@ -29,3 +30,12 @@ class SettingsModel:
     def default_response_format(self, value: ResponseFormat):
         self._default_response_format = value
 
+    # Первый запуск
+    @property
+    def first_start(self) -> bool:
+        return self._first_start
+
+    @first_start.setter
+    @validate_setter(bool)
+    def first_start(self, value: bool):
+        self._first_start = value

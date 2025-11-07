@@ -43,3 +43,12 @@ class ProductGroupModel(AbstractModel):
         item.id = dto.id
         item.name = dto.name
         return item
+
+    """
+    Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> ProductGroupDto:
+        return ProductGroupDto(
+            self._id,
+            self._name
+        )

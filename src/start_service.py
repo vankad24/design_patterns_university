@@ -7,15 +7,22 @@ from src.dto.measurement_dto import MeasurementUnitDto
 from src.dto.product_dto import ProductDto
 from src.dto.product_group_dto import ProductGroupDto
 from src.dto.recipe_dto import RecipeDto
+from src.dto.storage_dto import StorageDto
+from src.dto.transaction_dto import TransactionDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
+from src.models.settings import SettingsModel
+from src.models.storage import StorageModel
+from src.models.transaction import TransactionModel
 from src.models.validators.functions import validate_val
 
 from src.repository import Repository, RepoKeys
+from src.settings_manager import SettingsManager
+
 
 class StartService(metaclass=Singleton):
     """
@@ -32,7 +39,7 @@ class StartService(metaclass=Singleton):
     __cached_models: dict
     __repo: Repository
 
-    def __init__(self):
+    def __init__(self, path='./settings.json'):
         """
         Инициализация сервиса:
         - Загружает ссылку на репозиторий.
@@ -40,15 +47,13 @@ class StartService(metaclass=Singleton):
         - Устанавливает путь к JSON-файлу с данными.
         """
         self.__loaded_data = None
-        self.__filepath = './settings.json'
+        self.__filepath = path
         self.__repo = Repository()
         self.__cached_models = {}
         for key in RepoKeys:
             self.__cached_models[str(key)] = {}
-
-    def set_path(self, path):
-        validate_val(path, str)
-        self.__filepath = path
+        if SettingsManager().settings.first_start:
+            self.start()
 
     # --- Репозиторий ---
     @property
@@ -70,6 +75,8 @@ class StartService(metaclass=Singleton):
         """
         for data in self.__loaded_data[key]:
             dto: AbstractDto = create_dto(dto_type, data)
+            if dto.id in self.__cached_models:
+                continue
             model: AbstractModel = model_type.from_dto(dto, self.__cached_models)
             self.__cached_models[model.id] = model
             self.repo.data[key][model.id] = model
@@ -94,3 +101,5 @@ class StartService(metaclass=Singleton):
         self.create_models_from_loaded(RepoKeys.PRODUCTS, ProductModel, ProductDto)
         self.create_models_from_loaded(RepoKeys.INGREDIENTS, IngredientModel, IngredientDto)
         self.create_models_from_loaded(RepoKeys.RECIPES, RecipeModel, RecipeDto)
+        self.create_models_from_loaded(RepoKeys.STORAGES, StorageModel, StorageDto)
+        self.create_models_from_loaded(RepoKeys.TRANSACTIONS, TransactionModel, TransactionDto)

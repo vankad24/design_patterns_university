@@ -1,3 +1,4 @@
+from src.dto.cached_id import CachedId
 from src.dto.recipe_dto import RecipeDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
@@ -97,3 +98,22 @@ class RecipeModel(AbstractModel):
         item.ingredients = [cache[ingredient_id.id] for ingredient_id in dto.ingredients]
 
         return item
+
+    """
+    Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> RecipeDto:
+        # Преобразуем список IngredientModel в список CachedId,
+        # извлекая .id из каждой модели, если список не пуст
+        ingredients_dto = [
+            CachedId(ingredient.id)
+            for ingredient in self._ingredients
+        ] if self._ingredients else []
+
+        return RecipeDto(
+            self._id,
+            self._name,
+            self._cooking_time,
+            self._steps,
+            ingredients_dto
+        )

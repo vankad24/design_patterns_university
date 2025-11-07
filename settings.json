@@ -1,4 +1,6 @@
 {
+    "first_start": true,
+    "default_response_format": "json",
     "company": {
         "id": "c4546e8b-7260-4db8-a673-c8c123ab14a5",
         "name": "Рога и копыта",
@@ -8,6 +10,99 @@
         "bik": "123456789",
         "ownership": "00001"
     },
+    "storages":[
+            {
+                "name":"Общий склад",
+                "id":"7dc27e96-e6ad-4e5e-8c56-84e00667e3d7",
+                "address":"ул. Нижняя Набережная, 6"
+            }
+    ],
+    "transactions":[
+            {
+                "id": "0218470a-dde4-407c-9360-93bb1c3d15e7",
+                "period": "2025-01-01",
+                "value": 30.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
+                },
+                "product": {
+                    "id": "e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "0218470a-dde4-407c-9360-93bb1c3d15e8",
+                "period": "2025-01-05",
+                "value": -3.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
+                },
+                "product": {
+                    "id": "e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "0218470a-dde4-407c-9360-93bb1c3d15e9",
+                "period": "2025-01-12",
+                "value": -10.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
+                },
+                "product": {
+                    "id": "e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7b",
+                "period": "2025-01-12",
+                "value": 30.0,
+                "unit": {
+                    "id": "a33dd457-36a8-4de6-b5f1-40afa6193346"
+                },
+                "product": {
+                    "id": "0c101a7e-5934-4155-83a6-d2c388fcc11a"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7c",
+                "period": "2025-01-20",
+                "value": -0.5,
+                "unit": {
+                    "id": "a33dd457-36a8-4de6-b5f1-40afa6193346"
+                },
+                "product": {
+                    "id": "0c101a7e-5934-4155-83a6-d2c388fcc11a"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "2e8798be-0011-41ce-aa07-8ab81649dd7d",
+                "period": "2025-01-24",
+                "value": -1.2,
+                "unit": {
+                    "id": "a33dd457-36a8-4de6-b5f1-40afa6193346"
+                },
+                "product": {
+                    "id": "0c101a7e-5934-4155-83a6-d2c388fcc11a"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            }
+    ],
     "measurement_units": [
         {
             "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",

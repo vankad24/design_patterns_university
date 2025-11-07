@@ -1,3 +1,4 @@
+from src.dto.cached_id import CachedId
 from src.dto.product_dto import ProductDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
@@ -97,3 +98,14 @@ class ProductModel(AbstractModel):
             item.group = cache[dto.group.id]
 
         return item
+
+    """
+    Перевести домсенную модель в Dto
+    """
+    def to_dto(self) -> ProductDto:
+        return ProductDto(self._id,
+                          self._name,
+                          self._full_name,
+                          self._unit and CachedId(self._unit.id),
+                          self._group and CachedId(self._group.id))
+
