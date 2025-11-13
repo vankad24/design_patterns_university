@@ -2,23 +2,14 @@ from src.core.functions import load_json
 from src.core.singletone import Singleton
 from src.dto.abstract_dto import AbstractDto
 from src.dto.functions import create_dto
-from src.dto.ingridient_dto import IngredientDto
-from src.dto.measurement_dto import MeasurementUnitDto
-from src.dto.product_dto import ProductDto
-from src.dto.product_group_dto import ProductGroupDto
-from src.dto.recipe_dto import RecipeDto
-from src.dto.storage_dto import StorageDto
-from src.dto.transaction_dto import TransactionDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
 from src.models.recipe import RecipeModel
-from src.models.settings import SettingsModel
 from src.models.storage import StorageModel
 from src.models.transaction import TransactionModel
-from src.models.validators.functions import validate_val
 
 from src.repository import Repository, RepoKeys
 from src.settings_manager import SettingsManager
@@ -52,8 +43,11 @@ class StartService(metaclass=Singleton):
         self.__cached_models = {}
         for key in RepoKeys:
             self.__cached_models[str(key)] = {}
-        if SettingsManager().settings.first_start:
+
+        settings = SettingsManager().settings
+        if settings.first_start:
             self.start()
+            settings.first_start=False
 
     # --- Репозиторий ---
     @property
@@ -87,19 +81,26 @@ class StartService(metaclass=Singleton):
 
         :param filepath: путь к JSON-файлу
         """
-        self.__loaded_data = load_json(filepath)
+        self.__loaded_data = load_json(filepath)[Repository.CONFIG_KEY]
 
     def start(self):
         """
         Создаёт все стандартные сущности приложения.
         Порядок загрузки важен
         """
-        # Не менять порядок
+        # Загрузка из файла
         self.load(self.__filepath)
-        self.create_models_from_loaded(RepoKeys.MEASUREMENT_UNITS, MeasurementUnitModel, MeasurementUnitDto)
-        self.create_models_from_loaded(RepoKeys.PRODUCT_GROUPS, ProductGroupModel, ProductGroupDto)
-        self.create_models_from_loaded(RepoKeys.PRODUCTS, ProductModel, ProductDto)
-        self.create_models_from_loaded(RepoKeys.INGREDIENTS, IngredientModel, IngredientDto)
-        self.create_models_from_loaded(RepoKeys.RECIPES, RecipeModel, RecipeDto)
-        self.create_models_from_loaded(RepoKeys.STORAGES, StorageModel, StorageDto)
-        self.create_models_from_loaded(RepoKeys.TRANSACTIONS, TransactionModel, TransactionDto)
+
+        # Массив для перебора (Порядок важен!)
+        entities_to_load = [
+            (RepoKeys.MEASUREMENT_UNITS, MeasurementUnitModel),
+            (RepoKeys.PRODUCT_GROUPS, ProductGroupModel),
+            (RepoKeys.PRODUCTS, ProductModel),
+            (RepoKeys.INGREDIENTS, IngredientModel),
+            (RepoKeys.RECIPES, RecipeModel),
+            (RepoKeys.STORAGES, StorageModel),
+            (RepoKeys.TRANSACTIONS, TransactionModel),
+        ]
+
+        for repo_key, model_class in entities_to_load:
+            self.create_models_from_loaded(repo_key, model_class, model_class.DTO_CLASS)

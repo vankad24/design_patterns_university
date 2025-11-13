@@ -7,6 +7,9 @@ from src.models.validators.functions import not_empty
 ###############################################
 # Модель склада
 class StorageModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = StorageDto
+
     # Наименование склада
     _name: str = ""
     # Адрес склада
@@ -31,6 +34,16 @@ class StorageModel(AbstractModel):
     @validate_setter(str, check_func=not_empty)
     def address(self, value: str):
         self._address = value.strip()
+
+    @staticmethod
+    def create(name: str, address: str):
+        """
+            Фабричный метод для создания экземпляра из dto
+        """
+        item = StorageModel()
+        item.name = name
+        item.address = address
+        return item
 
     @staticmethod
     def from_dto(dto: StorageDto, cache: dict):

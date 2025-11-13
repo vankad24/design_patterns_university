@@ -16,6 +16,12 @@ from src.models.validators.exceptions import ArgumentException
 
 """Класс-фабрика для конвертации объектов и списков в словарь"""
 class FactoryConverters:
+    """
+    Фабрика, предназначенная для выбора и создания подходящего объекта-конвертера
+    (наследника AbstractConverter) на основе типа входного объекта.
+    Используется для стандартизированного преобразования различных типов данных
+    (модели, даты, списки, базовые типы) в словарь или другую форму для дальнейшей сериализации (например, в JSON).
+    """
     # Определяем словарь, который сопоставляет базовые типы с соответствующими конвертерами.
     _type_to_converter = {
         (bool, int, float, str, NoneType): BasicConverter,
@@ -28,7 +34,14 @@ class FactoryConverters:
     @staticmethod
     def get_converter(t: Type) -> AbstractConverter:
         """
-        Возвращает соответствующий конвертер для заданного типа.
+        Возвращает соответствующий экземпляр конвертера для заданного типа `t`.
+
+        Метод итерирует по зарегистрированным типам и проверяет, является ли
+        заданный тип `t` подклассом одного из зарегистрированных типов (или совпадает с ним).
+
+        :param t: Тип объекта, для которого требуется конвертер.
+        :return: Экземпляр соответствующего класса-конвертера (наследника AbstractConverter).
+        :raises ArgumentException: Если подходящий конвертер для типа не найден.
         """
         # Итерируем по ключам словаря (типам или кортежам типов)
         for types, converter_class in FactoryConverters._type_to_converter.items():
@@ -36,6 +49,7 @@ class FactoryConverters:
             if not isinstance(types, tuple):
                 types = (types,)
 
+            # Проверяем, является ли t подклассом любого из типов в кортеже 'types'.
             if issubclass(t, types):
                 return converter_class()
 
@@ -44,4 +58,12 @@ class FactoryConverters:
 
     @staticmethod
     def convert(obj):
+        """
+        Основной метод конвертации.
+
+        Получает конвертер, соответствующий типу объекта `obj`, и вызывает его метод `convert()`.
+
+        :param obj: Объект любого типа для конвертации.
+        :return: Результат работы метода `convert` выбранного конвертера (обычно словарь).
+        """
         return FactoryConverters.get_converter(type(obj)).convert(obj)

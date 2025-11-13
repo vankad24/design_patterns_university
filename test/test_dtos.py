@@ -2,7 +2,6 @@ import pytest
 
 from src.dto.functions import create_dto
 from src.dto.measurement_dto import MeasurementUnitDto
-from src.models.measurement_unit import MeasurementUnitModel
 
 
 # Проверить фабричный метод и загрузку данных в dto

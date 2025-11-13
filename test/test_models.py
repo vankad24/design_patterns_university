@@ -2,14 +2,13 @@ import os.path
 import shutil
 import tempfile
 import uuid
-from dataclasses import dataclass, field
 
-from src.dto.abstract_dto import AbstractDto
-from src.dto.cached_id import CachedId
+import pytest
+
 from src.dto.company_dto import CompanyDto
 from src.dto.functions import create_dto
 from src.dto.measurement_dto import MeasurementUnitDto
-from src.models.abstract_model import AbstractModel
+from src.models.company import CompanyModel
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
@@ -18,9 +17,7 @@ from src.models.recipe import RecipeModel
 from src.models.storage import StorageModel
 from src.models.validators.exceptions import ArgumentException
 from src.settings_manager import SettingsManager
-from src.models.company import CompanyModel
 
-import pytest
 
 class TestModels:
     """
@@ -183,7 +180,7 @@ class TestModels:
 
         with pytest.raises(ArgumentException) as exc_info:
             company = CompanyModel.from_dto(create_dto(CompanyDto, None), {})
-        assert exc_info.value.args[0] == "Пустой аргумент"
+        assert exc_info.value.args[0] == "Аргумент со значением None!"
 
         with pytest.raises(ArgumentException) as exc_info:
             company = CompanyModel.from_dto(create_dto(CompanyDto, ["name"]), {})

@@ -10,6 +10,9 @@ class CompanyModel(AbstractModel):
     def __init__(self):
         super().__init__()
 
+    # соответствующий модели dto класс
+    DTO_CLASS = CompanyDto
+
     # Наименование организации
     _name: str = ""
     # Идентификационный номер налогоплательщика (ИНН)

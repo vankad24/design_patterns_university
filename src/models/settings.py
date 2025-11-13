@@ -1,14 +1,23 @@
+from src.dto.settings_dto import SettingsDto
 from src.logics.responses.response_format import ResponseFormat
+from src.models.abstract_model import AbstractModel
 from src.models.company import CompanyModel
 from src.models.validators.decorators import validate_setter
 
 
 ######################################
 # Модель настроек приложения
-class SettingsModel:
+class SettingsModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = SettingsDto
+
+
     _company: CompanyModel = None
     _default_response_format: ResponseFormat = ResponseFormat.JSON
     _first_start: bool = True
+
+    def __init__(self):
+        super().__init__()
 
     # Организация
     @property
@@ -39,3 +48,27 @@ class SettingsModel:
     @validate_setter(bool)
     def first_start(self, value: bool):
         self._first_start = value
+
+    @staticmethod
+    def from_dto(dto: SettingsDto, cache: dict):
+        """
+            Фабричный метод для создания экземпляра SettingsModel из dto
+        """
+        item = SettingsModel()
+        item.id = dto.id
+        item.company = CompanyModel.from_dto(dto.company, cache)
+        item.default_response_format = ResponseFormat(dto.default_response_format)
+        item.first_start = dto.first_start
+
+        return item
+
+    """
+        Перевести доменную модель в DTO
+    """
+    def to_dto(self) -> SettingsDto:
+        return SettingsDto(
+            self._id,
+            self._company.to_dto(),
+            self._default_response_format,
+            self._first_start
+        )

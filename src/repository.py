@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from enum import StrEnum
 
 from src.core.singletone import Singleton
@@ -26,6 +27,9 @@ class Repository(metaclass=Singleton):
     """
     __data: dict = None
 
+    # ключ для сохранения в конфиг
+    CONFIG_KEY = 'models'
+
     def __init__(self):
         """
         Инициализация репозитория.
@@ -42,3 +46,9 @@ class Repository(metaclass=Singleton):
         Возвращает внутренний словарь с объектами.
         """
         return self.__data
+
+    def dump(self) -> dict:
+        """
+            Возвращает словарь с данными для сохранения моделей
+        """
+        return {self.CONFIG_KEY: {key: map(lambda x: asdict(x.to_dto()), self.__data[key].values()) for key in self.__data}}

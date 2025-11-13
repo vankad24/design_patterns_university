@@ -8,8 +8,12 @@ from src.models.product import ProductModel
 from src.models.storage import StorageModel
 from src.models.validators.decorators import validate_setter
 
+
 # Модель транзикций
 class TransactionModel(AbstractModel):
+    # соответствующий модели dto класс
+    DTO_CLASS = TransactionDto
+
     _period: datetime = None
     _value: float = 0.0
     _unit: MeasurementUnitModel = None
@@ -76,6 +80,9 @@ class TransactionModel(AbstractModel):
     @staticmethod
     def create(period: datetime, value: float, unit_model: MeasurementUnitModel,
                product_model: ProductModel, storage_model: StorageModel) -> "TransactionModel":
+        """
+            Фабричный метод для создания экземпляра из dto
+        """
         item = TransactionModel()
         item.period = period
         item.value = value
@@ -88,7 +95,7 @@ class TransactionModel(AbstractModel):
     def from_dto(dto: TransactionDto, cache: dict) -> "TransactionModel":
         item = TransactionModel()
         item.id = dto.id
-        item.period = datetime.strptime(dto.period, "%Y-%m-%d")
+        item.period = datetime.strptime(dto.period, "%Y-%m-%d")# "%Y-%m-%d %H:%M:%S"
         item.value = dto.value
 
         if dto.unit is not None:
@@ -100,10 +107,12 @@ class TransactionModel(AbstractModel):
 
         return item
 
+    """
+    Перевести доменную модель в DTO
+    """
     def to_dto(self) -> TransactionDto:
         return TransactionDto(
             self._id,
-            "",
             self._period.strftime("%Y-%m-%d"),
             self._value,
             self._unit and CachedId(self._unit.id),

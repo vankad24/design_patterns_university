@@ -1,0 +1,186 @@
+swagger: '2.0'
+info:
+  title: API сервиса Ромашка
+  version: 1.0.0
+  description: REST API для управления данными о складах, транзакциях, продуктах и рецептах.
+
+host: 127.0.0.1:8080
+#host: 0.0.0.0:8080 потом поменять
+basePath: /api
+schemes:
+  - http
+
+paths:
+  /status:
+    get:
+      tags:
+        - Общее
+      summary: Проверить доступность REST API
+      operationId: main.status 
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: Успешный ответ
+          schema:
+            type: string
+            example: SUCCESS
+
+  /responses/formats:
+    get:
+      tags:
+        - Ответы
+      summary: Получить список доступных форматов ответа
+      operationId: main.responses_formats
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Список форматов ответа
+          schema:
+            type: array
+            items:
+              type: string
+
+  /responses/models:
+    get:
+      tags:
+        - Ответы
+      summary: Получить список доступных моделей данных (ключей репозитория)
+      operationId: main.responses_models
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Список ключей репозитория
+          schema:
+            type: array
+            items:
+              type: string
+
+  /responses/build:
+    get:
+      tags:
+        - Ответы
+      summary: Построить ответ на основе формата и модели
+      operationId: main.build_response
+      parameters:
+        - name: format
+          in: query
+          description: Формат ответа
+          required: true
+          type: string
+        - name: model
+          in: query
+          description: Модель данных
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Результат, построенный в указанном формате
+          schema:
+            type: object
+        '400':
+          description: Ошибка неверного аргумента
+
+  /recipes:
+    get:
+      tags:
+        - Рецепты
+      summary: Получить список всех рецептов
+      operationId: main.get_recipes
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Список рецептов
+          schema:
+            type: array
+            items:
+              type: object # Заглушка для модели Recipe
+
+  /recipes/{recipe_id}:
+    get:
+      tags:
+        - Рецепты
+      summary: Получить рецепт по его ID
+      operationId: main.get_recipe
+      parameters:
+        - name: recipe_id
+          in: path
+          description: Уникальный ID рецепта
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Один рецепт
+          schema:
+            type: object
+        '404':
+          description: Рецепт не найден
+
+  /tbs/{storage_id}:
+    get:
+      tags:
+        - Отчеты
+      summary: Оборотно-сальдовая ведомость (Turnover balance sheet)
+      operationId: main.get_tbs
+      parameters:
+        - name: storage_id
+          in: path
+          description: Уникальный код склада
+          required: true
+          type: string
+        - name: start_date
+          in: query
+          description: Начальная дата отчёта (формат YYYY-MM-DD)
+          required: true
+          type: string
+          format: date
+        - name: end_date
+          in: query
+          description: Дата окончания отчёта (формат YYYY-MM-DD)
+          required: true
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Результат расчета оборотно-сальдовой ведомости
+          schema:
+            type: array
+            items:
+              type: object # Заглушка для TurnoverItem
+        '400':
+          description: Ошибка (например, неверная дата или не найден склад)
+
+  /repository/all:
+    get:
+      tags:
+        - Хранилище
+      summary: Получить все данные из Repository в формате JSON
+      operationId: main.get_all_from_repository
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: JSON со всеми данными репозитория
+          schema:
+            type: object
+
+  /save_all:
+    post:
+      tags:
+        - Управление
+      summary: Сохранить все данные (репозиторий и настройки) в файл
+      operationId: main.save_all
+      responses:
+        '200':
+          description: Успешное сохранение
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: ok
