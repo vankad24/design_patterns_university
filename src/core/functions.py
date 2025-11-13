@@ -1,6 +1,9 @@
 import json
 from typing import get_type_hints
 
+from src.models.measurement_unit import MeasurementUnitModel
+
+
 def load_json(file_name):
     """
     Загружает JSON-данные из файла.
@@ -63,3 +66,12 @@ def get_fields(obj, include_private=False, include_callable=False):
         if (not key.startswith("_") or include_private) and (not callable(value) or include_callable):
             result[key] = value
     return result
+
+def measurement_unit_to_super_base(unit: MeasurementUnitModel):
+    result_factor = 1
+    while True:
+        result_factor*=unit.conversion_factor
+        if unit.base_unit is None:
+            break
+        unit = unit.base_unit
+    return result_factor, unit

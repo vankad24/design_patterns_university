@@ -4,6 +4,7 @@ import connexion
 from flask import request
 
 from src.core.functions import dump_json
+from src.export_manager import ExportManager
 from src.logics.factory_converters import FactoryConverters
 from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.error_response import ErrorResponse
@@ -123,14 +124,8 @@ def save_all():
     """
     Сохранить все данные (settings и repository) в файл
     """
-    dicts = [
-        settings_manager.dump(),
-        repository.dump()
-    ]
-    dumped_dict = {}
-    for d in dicts:
-        dumped_dict.update(d)
-    data = FactoryConverters.convert(dumped_dict)
+    exported_dict = ExportManager().export_to_dict()
+    data = FactoryConverters.convert(exported_dict)
     dump_json(data, settings_manager.file_name)
     return JsonResponse.build([{"status":"ok"}])
 
