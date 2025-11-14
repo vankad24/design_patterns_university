@@ -1,7 +1,3 @@
-import uuid
-from abc import ABC
-
-from src.dto.abstract_dto import AbstractDto
 from src.dto.cached_id import CachedId
 from src.dto.tbs_dto import TurnoverBalanceItemDto
 from src.models.abstract_model import AbstractModel
@@ -32,7 +28,7 @@ class TurnoverBalanceItem(AbstractModel):
         return self._storage
 
     @storage.setter
-    @validate_setter(StorageModel)
+    @validate_setter(StorageModel, none_allowed=True)
     def storage(self, value: StorageModel):
         self._storage = value
 
@@ -102,7 +98,7 @@ class TurnoverBalanceItem(AbstractModel):
 
     @staticmethod
     def create(
-        storage: StorageModel,
+        storage: StorageModel|None,
         product: ProductModel,
         unit: MeasurementUnitModel,
         start_balance: float = 0.0,

@@ -2,10 +2,12 @@ from dataclasses import dataclass, field
 
 from src.dto.abstract_dto import AbstractDto
 from src.dto.filter_dto import FilterDto
+from src.dto.sorting_dto import SortingDto
+
 
 # Пример
 # {
-#         "filters": {
+#         "filters":
 #             [
 #                 {
 #                     "filed_name": "name",
@@ -16,16 +18,17 @@ from src.dto.filter_dto import FilterDto
 #                     "value": "кг"
 #                 },
 #             ]
-#         },
-#         "sorting":[
-#             "unit_name"
-#         ]
+#         "sorts":
+#             {
+#                 "filed_names": ["unit", "name"],
+#                 "descending": false
+#               },
 #     }
 
 
-# класс dto для фильтрации
+# класс dto для фильтрации и сортировки
 @dataclass
 class FilterSortingDto(AbstractDto):
     filters: list[FilterDto] = field(default_factory=list)
-    sorting: list[str] = field(default_factory=list)
+    sorts: SortingDto = None
 
