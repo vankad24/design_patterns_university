@@ -75,3 +75,8 @@ def measurement_unit_to_super_base(unit: MeasurementUnitModel):
             break
         unit = unit.base_unit
     return result_factor, unit
+
+def get_nested_attr(obj, field_names: list):
+    for filed in field_names:
+        obj = getattr(obj, filed)
+    return obj
