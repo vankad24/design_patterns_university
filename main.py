@@ -1,9 +1,13 @@
-from datetime import datetime
-
 import connexion
 from flask import request
 
 from src.core.functions import dump_json
+from src.core.prototype import Prototype
+from src.dto.filter_dto import FilterDto
+from src.dto.filter_models_dto import FilterModelsDto
+from src.dto.filter_tbs_dto import FilterTbsDto
+from src.dto.functions import create_dto
+from src.export_manager import ExportManager
 from src.logics.factory_converters import FactoryConverters
 from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.error_response import ErrorResponse
@@ -96,17 +100,24 @@ def get_tbs(storage_id: str):
     - `start_date`: начальная дата отчёта
     - `end_date`: дата окончания отчёта
     """
-    start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
-    end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d')
 
     storage = start_service.repo.data[RepoKeys.STORAGES].get(storage_id)
     if storage is None:
         return ErrorResponse.build(f"Склад с id:'{storage_id}' не найден")
 
-    if start_date >= end_date:
+    dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage)],
+                       start_date=request.args.get('start_date'), end_date=request.args.get('end_date'))
+
+    if dto.start_date >= dto.end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
-    items = TurnoverBalanceSheet.calculate(repository.data[RepoKeys.TRANSACTIONS].values(), repository.data[RepoKeys.PRODUCTS], storage, start_date, end_date)
+    try:
+        items = TurnoverBalanceSheet.calculate(
+            repository.get_values(RepoKeys.TRANSACTIONS),
+            repository.data[RepoKeys.PRODUCTS],
+            dto)
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
 
     return FactoryEntities().create(ResponseFormat.JSON).build(items)
 
@@ -123,16 +134,50 @@ def save_all():
     """
     Сохранить все данные (settings и repository) в файл
     """
-    dicts = [
-        settings_manager.dump(),
-        repository.dump()
-    ]
-    dumped_dict = {}
-    for d in dicts:
-        dumped_dict.update(d)
-    data = FactoryConverters.convert(dumped_dict)
+    exported_dict = ExportManager().export_to_dict()
+    data = FactoryConverters.convert(exported_dict)
     dump_json(data, settings_manager.file_name)
     return JsonResponse.build([{"status":"ok"}])
+
+@app.route("/api/tbs-filter", methods=['POST'])
+def get_tbs_filter():
+    """
+    Оборотно-сальдовая ведомость (Turnover balance sheet)
+    """
+    try:
+        dto: FilterTbsDto = create_dto(FilterTbsDto, request.get_json())
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    if dto.start_date >= dto.end_date:
+        return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
+
+    try:
+        items = TurnoverBalanceSheet.calculate(
+            repository.get_values(RepoKeys.TRANSACTIONS),
+            repository.data[RepoKeys.PRODUCTS],
+            dto)
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
+
+    return FactoryEntities().create(ResponseFormat.JSON).build(items)
+
+@app.route("/api/models-filter", methods=['POST'])
+def get_models_filter():
+    """
+    Получить модели и отфильтровать их
+    """
+    try:
+        dto: FilterModelsDto = create_dto(FilterModelsDto, request.get_json())
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+    try:
+        model = RepoKeys(dto.model)
+    except:
+        return ErrorResponse.build(f"Неверный аргумент 'model':{dto.model}")
+
+    models = Prototype(repository.get_values(model)).filter_mul(dto.filters).sort(dto.sorts).data
+    return FactoryEntities().create(ResponseFormat.JSON).build(models)
 
 
 if __name__ == '__main__':

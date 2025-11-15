@@ -1,6 +1,3 @@
-from src.models.validators.functions import validate_val
-
-from abc import ABC
 from abc import ABC
 
 from src.models.validators.functions import validate_val

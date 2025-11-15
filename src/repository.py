@@ -40,12 +40,18 @@ class Repository(metaclass=Singleton):
             self.__data[str(key)] = {}  # ключи хранятся как строки
 
     @property
-    def data(self):
+    def data(self) -> dict[str, dict]:
         """
         Доступ к данным репозитория.
         Возвращает внутренний словарь с объектами.
         """
         return self.__data
+
+    def get_values(self, key) -> list:
+        """
+            Получить список всех значений по ключу из репозитория
+        """
+        return list(self.data[key].values())
 
     def dump(self) -> dict:
         """

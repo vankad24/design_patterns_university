@@ -1,3 +1,4 @@
+import json
 from types import GenericAlias
 
 from src.core.functions import get_type_hints_without_underscore
@@ -46,3 +47,12 @@ def create_dto(dto_class, data: dict):
 
     return obj
 
+def create_from_json(dto_class, json_str: str):
+    """
+    Создает экземпляр объекта передачи данных (DTO) заданного класса и заполняет его поля данными из json строки.
+
+    :param json_str: Строка json
+    :param dto_class: Класс DTO, который нужно создать (должен наследоваться от AbstractDto).
+    :return:
+    """
+    return create_dto(dto_class, json.loads(json_str))

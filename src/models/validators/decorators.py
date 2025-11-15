@@ -17,7 +17,7 @@ def validate_setter(check_type, check_len=None, check_func=None, none_allowed=Fa
                 from src.models.validators.functions import validate_val
                 validate_val(value, check_type, check_len, check_func, none_allowed)
             except Exception as e:
-                raise RuntimeError(f"Setter '{setter_name}' не выполнился") from e
+                raise RuntimeError(f"Setter '{setter_name}' не выполнился: {e}") from e
             setter_func(self, value)
 
         return wrapper

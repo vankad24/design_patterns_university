@@ -224,7 +224,7 @@ class TestModels:
         with pytest.raises(RuntimeError) as exc_info:
             company = CompanyModel.from_dto(create_dto(CompanyDto, data), {})
 
-        assert exc_info.value.args[0] == f"Setter '{field}' не выполнился"
+        assert f"Setter '{field}' не выполнился" in exc_info.value.args[0]
         caused_exc = exc_info.value.__cause__
         assert isinstance(caused_exc, ArgumentException)
         assert error_msg in caused_exc.args[0]

@@ -26,7 +26,7 @@ def validate_val(value, check_type, check_len=None, check_func=None, none_allowe
         raise ArgumentException("Аргумент со значением None!")
 
     # Проверка типа
-    if not isinstance(value, check_type):
+    if value is not None and not isinstance(value, check_type):
         raise ArgumentException(f"Некорректный тип!\nОжидается {check_type}. Текущий тип {type(value)}")
 
     # Проверка длины
