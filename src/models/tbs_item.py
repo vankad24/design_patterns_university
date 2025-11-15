@@ -6,7 +6,7 @@ from src.models.product import ProductModel
 from src.models.storage import StorageModel
 from src.models.validators.decorators import validate_setter
 
-
+# Вспомогательный класс для подсчёта ОСВ конкретного продукта
 class TurnoverBalanceItem(AbstractModel):
     def __init__(self):
         super().__init__()

@@ -49,7 +49,7 @@ class TurnoverBalanceSheet:
         return result
 
 
-    # Функция подсчёта сальдовой ведомости по продуктам для конкретного склада
+    # Функция подсчёта сальдовой ведомости по продуктам с фильтрацией и сортировкой используя данные из dto
     @staticmethod
     def calculate(all_transactions: list[TransactionModel], all_products: dict, dto: FilterTbsDto):
         start = datetime.strptime(dto.start_date, '%Y-%m-%d')

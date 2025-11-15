@@ -48,6 +48,9 @@ class Repository(metaclass=Singleton):
         return self.__data
 
     def get_values(self, key) -> list:
+        """
+            Получить список всех значений по ключу из репозитория
+        """
         return list(self.data[key].values())
 
     def dump(self) -> dict:
