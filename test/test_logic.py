@@ -2,6 +2,8 @@ from datetime import datetime
 
 import pytest
 
+from src.dto.filter_dto import FilterDto
+from src.dto.filter_tbs_dto import FilterTbsDto
 from src.logics.factory_entities import FactoryEntities
 from src.logics.responses.abstract_response import AbstractResponse
 from src.logics.responses.csv_response import CsvResponse
@@ -96,8 +98,8 @@ def test_tbs_calculation_full_scenario(storage_a, storage_b, product_a, product_
     Начальное сальдо, Приход/Расход, Фильтрация по складу и дате, Продукт без движений.
     """
     # Подготовка
-    START_DATE = datetime(2024, 1, 1)
-    END_DATE = datetime(2024, 1, 31)
+    START_DATE = "2024-01-01"
+    END_DATE = "2024-01-31"
 
     all_transactions = [
         # 1. Начальное сальдо для Prod A (период ДО)
@@ -116,9 +118,11 @@ def test_tbs_calculation_full_scenario(storage_a, storage_b, product_a, product_
         # 5. Транзакция ПОСЛЕ периода (должна быть ИГНОРИРОВАНА)
         TransactionModel.create(datetime(2024, 2, 1), 999.0, base_unit, product_a, storage_a),
     ]
+    dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage_a)],
+                       start_date=START_DATE, end_date=END_DATE)
 
     # Действие
-    result_list = TurnoverBalanceSheet.calculate(all_transactions, all_products, storage_a, START_DATE, END_DATE)
+    result_list = TurnoverBalanceSheet.calculate(all_transactions, all_products, dto)
 
     # Проверки
     assert len(result_list) == 2
@@ -141,12 +145,14 @@ def test_tbs_calculation_full_scenario(storage_a, storage_b, product_a, product_
 def test_tbs_calculation_empty_transactions(storage_a, all_products):
     """Проверяет, что расчет для пустого списка транзакций возвращает 0 для всех продуктов."""
     # Подготовка
-    START_DATE = datetime(2024, 1, 1)
-    END_DATE = datetime(2024, 1, 31)
+    START_DATE = "2024-01-01"
+    END_DATE = "2024-01-31"
     all_transactions = []
+    dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage_a)],
+                       start_date=START_DATE, end_date=END_DATE)
 
     # Действие
-    result_list = TurnoverBalanceSheet.calculate(all_transactions, all_products, storage_a, START_DATE, END_DATE)
+    result_list = TurnoverBalanceSheet.calculate(all_transactions, all_products, dto)
 
     # Проверки
     assert len(result_list) == 2

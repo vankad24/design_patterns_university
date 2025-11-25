@@ -1,6 +1,9 @@
 import json
 from typing import get_type_hints
 
+from src.models.measurement_unit import MeasurementUnitModel
+
+
 def load_json(file_name):
     """
     Загружает JSON-данные из файла.
@@ -63,3 +66,43 @@ def get_fields(obj, include_private=False, include_callable=False):
         if (not key.startswith("_") or include_private) and (not callable(value) or include_callable):
             result[key] = value
     return result
+def measurement_unit_to_super_base(unit: MeasurementUnitModel):
+    """
+    Рекурсивно (через итерацию с циклом while) преобразует заданную единицу измерения
+    в самую базовую (корневую) единицу в иерархии и вычисляет общий коэффициент
+    преобразования от исходной единицы к этой базовой единице.
+
+    :param unit: Исходный объект единицы измерения (MeasurementUnitModel),
+                 который должен иметь поля 'conversion_factor' (множитель к базовой единице)
+                 и 'base_unit' (ссылка на базовую единицу, или None для корневой).
+    :return: Кортеж, содержащий:
+             1. result_factor (float): Общий коэффициент, который нужно умножить
+                на числовое значение в исходной единице, чтобы получить значение
+                в самой базовой единице.
+             2. unit (MeasurementUnitModel): Самая базовая (корневая) единица в иерархии.
+    """
+    result_factor = 1  # Инициализация общего коэффициента преобразования
+    while True:
+        # Умножаем текущий общий коэффициент на коэффициент преобразования текущей единицы
+        result_factor*=unit.conversion_factor
+        # Проверяем, является ли текущая единица базовой (корневой)
+        if unit.base_unit is None:
+            break  # Выход из цикла, если достигнута корневая единица
+        # Переход к следующей базовой единице
+        unit = unit.base_unit
+    return result_factor, unit
+
+def get_nested_attr(obj, field_names: list):
+    """
+    Получает значение вложенного атрибута из объекта, используя список имен полей.
+    Например, для field_names=['address', 'city'] функция вернет obj.address.city.
+
+    :param obj: Исходный объект, из которого нужно извлечь атрибут.
+    :param field_names: Список строк, представляющих иерархию вложенных атрибутов.
+    :return: Значение самого вложенного атрибута.
+    :raises AttributeError: Если какой-либо атрибут не существует на соответствующем уровне.
+    """
+    for filed in field_names:
+        # Последовательно получаем атрибут, используя getattr()
+        obj = getattr(obj, filed)
+    return obj
