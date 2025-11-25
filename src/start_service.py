@@ -7,6 +7,7 @@ from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.product_group import ProductGroupModel
+from src.models.product_remain import ProductRemainModel
 from src.models.recipe import RecipeModel
 from src.models.storage import StorageModel
 from src.models.transaction import TransactionModel
@@ -100,6 +101,7 @@ class StartService(metaclass=Singleton):
             (RepoKeys.RECIPES, RecipeModel),
             (RepoKeys.STORAGES, StorageModel),
             (RepoKeys.TRANSACTIONS, TransactionModel),
+            (RepoKeys.PRODUCT_REMAINS, ProductRemainModel),
         ]
 
         for repo_key, model_class in entities_to_load:

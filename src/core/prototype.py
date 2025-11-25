@@ -73,6 +73,8 @@ class Prototype:
         :param dto: Объект FilterDto, содержащий имя поля (с точками), оператор и значение.
         :return: Новый экземпляр Prototype, содержащий только отфильтрованные данные.
         """
+        if not dto:
+            return self
         # Фильтрация с использованием соответствующей функции оператора и получения вложенного атрибута
         result = filter(lambda item: self._operator_to_func[dto.op](get_nested_attr(item, dto.field_name.split(".")), dto.value), self.data)
         return self.clone(list(result))

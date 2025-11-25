@@ -10,3 +10,4 @@ class SettingsDto(AbstractDto):
     company: CompanyDto = None
     default_response_format: str = 'json'
     first_start: bool = True
+    block_date: str = ''

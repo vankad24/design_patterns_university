@@ -11,9 +11,15 @@
             "ownership": "00002"
         },
         "default_response_format": "json",
-        "first_start": true
+        "first_start": true,
+        "block_date": "2024-01-01"
     },
     "models": {
+        "product_remains": [
+            {
+
+            }
+        ],
         "measurement_units": [
             {
                 "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",

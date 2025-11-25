@@ -4,9 +4,12 @@ from src.core.functions import measurement_unit_to_super_base
 from src.core.prototype import Prototype
 from src.dto.filter_dto import FilterDto
 from src.dto.filter_tbs_dto import FilterTbsDto
+from src.models.product_remain import ProductRemainModel
 from src.models.tbs_item import TurnoverBalanceItem
 from src.models.transaction import TransactionModel
 from src.models.validators.exceptions import OperationException
+from src.repository import Repository, RepoKeys
+from src.settings_manager import SettingsManager
 
 
 # Класс для подсчёта сальдовой ведомости
@@ -51,15 +54,15 @@ class TurnoverBalanceSheet:
 
     # Функция подсчёта сальдовой ведомости по продуктам с фильтрацией и сортировкой используя данные из dto
     @staticmethod
-    def calculate(all_transactions: list[TransactionModel], all_products: dict, dto: FilterTbsDto):
-        start = datetime.strptime(dto.start_date, '%Y-%m-%d')
-        end = datetime.strptime(dto.end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
-
+    def calculate(all_transactions: list[TransactionModel], all_products: dict, dto: FilterTbsDto, start: datetime, end: datetime, block_date: datetime = None, product_remains: list[ProductRemainModel]=[], include_zero_values=True):
         result = []
 
         transactions_prototype = Prototype(all_transactions)\
             .filter(FilterDto(field_name="period", value=end, op="<"))\
             .filter_mul(dto.transaction_filters)
+
+        if block_date:
+            transactions_prototype = transactions_prototype.filter(FilterDto(field_name="period", value=block_date, op=">="))
 
         data = transactions_prototype.data.copy()
         unique_product_ids = set()
@@ -82,10 +85,11 @@ class TurnoverBalanceSheet:
                     raise OperationException(f"Разные единицы измерения {base_unit} и {product_to_base_unit[pid]} для {trans.product}")
             transactions_prototype = Prototype(data)
 
-            start_transactions = transactions_prototype.filter(FilterDto(field_name="period", value=start, op="<"))
-            current_transactions = transactions_prototype.filter(FilterDto(field_name="period", value=start, op=">="))
-            positive_transactions = current_transactions.filter(FilterDto(field_name="value", value=0, op=">"))
-            negative_transactions = current_transactions.filter(FilterDto(field_name="value", value=0, op="<"))
+            start_balance_proto = transactions_prototype.filter(FilterDto(field_name="period", value=start, op="<"))
+            current_period_proto = transactions_prototype.filter(FilterDto(field_name="period", value=start, op=">="))
+            positive_values_proto = current_period_proto.filter(FilterDto(field_name="value", value=0, op=">"))
+            negative_values_proto = current_period_proto.filter(FilterDto(field_name="value", value=0, op="<"))
+            product_remains_proto = Prototype(product_remains)
 
             for storage_id in id_to_storage:
                 storage = id_to_storage[storage_id]
@@ -93,9 +97,11 @@ class TurnoverBalanceSheet:
                 for product_id in unique_product_ids:
                     product = all_products[product_id]
                     filter_by_product = FilterDto(field_name="product", value=product)
-                    start_values = start_transactions.filter_mul([filter_by_storage, filter_by_product]).data
-                    positive_values = positive_transactions.filter_mul([filter_by_storage, filter_by_product]).data
-                    negative_values = negative_transactions.filter_mul([filter_by_storage, filter_by_product]).data
+                    filters = [filter_by_storage, filter_by_product]
+                    start_values = start_balance_proto.filter_mul(filters).data
+                    positive_values = positive_values_proto.filter_mul(filters).data
+                    negative_values = negative_values_proto.filter_mul(filters).data
+                    remains = product_remains_proto.filter_mul(filters).data
 
                     item = TurnoverBalanceItem.create(storage, product, product_to_base_unit[product_id])
 
@@ -103,7 +109,7 @@ class TurnoverBalanceSheet:
                         return float(sum(map(lambda x: x.value, values)))
 
                     # Начальное сальдо
-                    item.start_balance = sum_values(start_values)
+                    item.start_balance = sum_values(start_values) + sum_values(remains)
                     # Поступления
                     item.inflows = sum_values(positive_values)
                     # Расходы
@@ -111,8 +117,27 @@ class TurnoverBalanceSheet:
 
                     result.append(item)
 
-        filtered_products = Prototype(list(all_products.values())).filter(FilterDto(field_name='id', value=unique_product_ids, op="notin")).data
-        for product in filtered_products:
-            result.append(TurnoverBalanceItem.create(None, product, product.unit))
+        if include_zero_values:
+            filtered_products = Prototype(list(all_products.values())).filter(FilterDto(field_name='id', value=unique_product_ids, op="notin")).data
+            for product in filtered_products:
+                result.append(TurnoverBalanceItem.create(None, product, product.unit))
 
         return Prototype(result).filter_mul(dto.result_filters).sort(dto.result_sorts).data
+
+    @staticmethod
+    def calculate_remains(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict):
+        start_date = datetime.fromtimestamp(0)  # timestamp с начала 1970 года
+        tbs_items: list[TurnoverBalanceItem] = TurnoverBalanceSheet.calculate(all_transactions, all_products,
+                                                                              FilterTbsDto(), start_date,
+                                                                              new_block_date, include_zero_values=False)
+        remains = {}
+        for item in tbs_items:
+            model = ProductRemainModel.create(item.inflows + item.outflows, item.unit, item.product, item.storage)
+            remains[model.id] = model
+        return remains
+
+    @staticmethod
+    def change_block_date(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict):
+        Repository().data[RepoKeys.PRODUCT_REMAINS] = TurnoverBalanceSheet.calculate_remains(new_block_date, all_transactions, all_products)
+        SettingsManager().settings.block_date = new_block_date
+

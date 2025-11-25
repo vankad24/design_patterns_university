@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import connexion
 from flask import request
 
@@ -21,6 +23,7 @@ from src.start_service import StartService
 start_service = StartService()
 repository = Repository()
 settings_manager = SettingsManager()
+settings = settings_manager.settings
 
 app = connexion.FlaskApp(__name__)
 app.add_api('swagger.yaml', base_path='/api')
@@ -105,17 +108,23 @@ def get_tbs(storage_id: str):
     if storage is None:
         return ErrorResponse.build(f"Склад с id:'{storage_id}' не найден")
 
-    dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage)],
-                       start_date=request.args.get('start_date'), end_date=request.args.get('end_date'))
+    try:
+        dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage)])
 
-    if dto.start_date >= dto.end_date:
+        start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    if start_date >= end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
     try:
         items = TurnoverBalanceSheet.calculate(
             repository.get_values(RepoKeys.TRANSACTIONS),
             repository.data[RepoKeys.PRODUCTS],
-            dto)
+            dto, start_date, end_date, settings.block_date,
+            repository.get_values(RepoKeys.PRODUCT_REMAINS))
     except Exception as e:
         return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
 
@@ -146,17 +155,20 @@ def get_tbs_filter():
     """
     try:
         dto: FilterTbsDto = create_dto(FilterTbsDto, request.get_json())
+        start_date = datetime.strptime(dto.start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(dto.end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
     except Exception as e:
         return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
 
-    if dto.start_date >= dto.end_date:
+    if start_date >= end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
     try:
         items = TurnoverBalanceSheet.calculate(
             repository.get_values(RepoKeys.TRANSACTIONS),
             repository.data[RepoKeys.PRODUCTS],
-            dto)
+            dto, start_date, end_date, settings.block_date,
+            repository.get_values(RepoKeys.PRODUCT_REMAINS))
     except Exception as e:
         return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
 

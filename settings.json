@@ -11,7 +11,8 @@
             "ownership": "00001"
         },
         "default_response_format": "json",
-        "first_start": true
+        "first_start": true,
+        "block_date": "2024-01-01"
     },
     "models": {
         "measurement_units": [
