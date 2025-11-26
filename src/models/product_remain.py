@@ -57,7 +57,7 @@ class ProductRemainModel(AbstractModel):
         return self._storage
 
     @storage.setter
-    @validate_setter(StorageModel)
+    @validate_setter(StorageModel, none_allowed=True)
     def storage(self, value: StorageModel):
         self._storage = value
 

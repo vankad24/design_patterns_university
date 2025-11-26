@@ -22,6 +22,7 @@ class SettingsManager(metaclass=Singleton):
     def __init__(self):
 
         self.set_default()
+        self.load()
 
     @property
     def settings(self) -> SettingsModel:

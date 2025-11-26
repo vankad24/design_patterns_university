@@ -7,7 +7,7 @@
             "inn": "123456789012",
             "account": "12345678901",
             "corr_account": "10987654321",
-            "bik": "123456789",
+            "bik":  "123456789",
             "ownership": "00001"
         },
         "default_response_format": "json",
@@ -418,6 +418,11 @@
                 "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7",
                 "name": "Общий склад",
                 "address": "ул. Нижняя Набережная, 6"
+            },
+            {
+                "id": "7dc27e96-e6ad-4e5e-8c56-84e00667c2b2",
+                "name": "Дополнительный склад",
+                "address": "ул. Карла Маркса, 24"
             }
         ],
         "transactions": [
@@ -497,6 +502,47 @@
                 "value": -1.2,
                 "unit": {
                     "id": "a33dd457-36a8-4de6-b5f1-40afa6193346"
+                },
+                "product": {
+                    "id": "0c101a7e-5934-4155-83a6-d2c388fcc11a"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            }
+        ],
+        "product_remains": [
+            {
+                "id": "2baff930-048a-4cb2-b3b9-c1c536631e7d",
+                "value": 10.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
+                },
+                "product": {
+                    "id": "e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667e3d7"
+                }
+            },
+            {
+                "id": "25c32d14-df38-4795-a7b5-7ab2e769caa6",
+                "value": 1.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
+                },
+                "product": {
+                    "id": "e0f1a8f3-812d-4f9b-bde8-9b0f6b178a2e"
+                },
+                "storage": {
+                    "id": "7dc27e96-e6ad-4e5e-8c56-84e00667c2b2"
+                }
+            },
+            {
+                "id": "050ba83a-b578-493f-94c3-3c6c0be07aab",
+                "value": 3.0,
+                "unit": {
+                    "id": "f8346e8b-7260-4db8-a673-c8c826ab08b7"
                 },
                 "product": {
                     "id": "0c101a7e-5934-4155-83a6-d2c388fcc11a"

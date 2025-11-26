@@ -198,7 +198,7 @@ def set_block_date_route():
     """
     try:
         data = request.get_json()
-        new_block_date = data['new_block_date']
+        new_block_date = datetime.strptime(data['new_block_date'], '%Y-%m-%d')
     except Exception as e:
         return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
 
@@ -230,8 +230,7 @@ def get_product_remains_route():
     Возвращает остатки товаров на указанную дату.
     """
     try:
-        data = request.get_json()
-        target_date = data['new_block_date']
+        target_date = datetime.strptime(request.args.get('target_date'), '%Y-%m-%d')
     except Exception as e:
         return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
 
@@ -241,7 +240,8 @@ def get_product_remains_route():
             repository.get_values(RepoKeys.TRANSACTIONS),
             repository.data[RepoKeys.PRODUCTS],
             settings.block_date,
-            repository.get_values(RepoKeys.PRODUCT_REMAINS)
+            repository.get_values(RepoKeys.PRODUCT_REMAINS),
+            True
         )
         return FactoryEntities().create(ResponseFormat.JSON).build(remains_data)
     except Exception as e:

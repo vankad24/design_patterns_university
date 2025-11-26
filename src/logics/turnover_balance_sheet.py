@@ -125,13 +125,13 @@ class TurnoverBalanceSheet:
         return Prototype(result).filter_mul(dto.result_filters).sort(dto.result_sorts).data
 
     @staticmethod
-    def calculate_remains(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict, old_block_date: datetime = None, old_product_remains: list[ProductRemainModel]=[], ):
+    def calculate_remains(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict, old_block_date: datetime = None, old_product_remains: list[ProductRemainModel]=[], include_zero_values=False):
         start_date = datetime.fromtimestamp(0)  # timestamp с начала 1970 года
         tbs_items: list[TurnoverBalanceItem] = TurnoverBalanceSheet.calculate(all_transactions, all_products,
                                                                               FilterTbsDto(), start_date,
                                                                               new_block_date,
                                                                               old_block_date, old_product_remains,
-                                                                              include_zero_values=False)
+                                                                              include_zero_values=include_zero_values)
         remains = {}
         for item in tbs_items:
             model = ProductRemainModel.create(item.inflows + item.outflows, item.unit, item.product, item.storage)
