@@ -58,7 +58,7 @@ class TurnoverBalanceSheet:
         result = []
 
         transactions_prototype = Prototype(all_transactions)\
-            .filter(FilterDto(field_name="period", value=end, op="<"))\
+            .filter(FilterDto(field_name="period", value=end, op="<="))\
             .filter_mul(dto.transaction_filters)
 
         if block_date:
@@ -125,11 +125,13 @@ class TurnoverBalanceSheet:
         return Prototype(result).filter_mul(dto.result_filters).sort(dto.result_sorts).data
 
     @staticmethod
-    def calculate_remains(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict):
+    def calculate_remains(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict, old_block_date: datetime = None, old_product_remains: list[ProductRemainModel]=[], ):
         start_date = datetime.fromtimestamp(0)  # timestamp с начала 1970 года
         tbs_items: list[TurnoverBalanceItem] = TurnoverBalanceSheet.calculate(all_transactions, all_products,
                                                                               FilterTbsDto(), start_date,
-                                                                              new_block_date, include_zero_values=False)
+                                                                              new_block_date,
+                                                                              old_block_date, old_product_remains,
+                                                                              include_zero_values=False)
         remains = {}
         for item in tbs_items:
             model = ProductRemainModel.create(item.inflows + item.outflows, item.unit, item.product, item.storage)
@@ -138,6 +140,8 @@ class TurnoverBalanceSheet:
 
     @staticmethod
     def change_block_date(new_block_date: datetime, all_transactions: list[TransactionModel], all_products: dict):
-        Repository().data[RepoKeys.PRODUCT_REMAINS] = TurnoverBalanceSheet.calculate_remains(new_block_date, all_transactions, all_products)
-        SettingsManager().settings.block_date = new_block_date
+        repo = Repository()
+        sett = SettingsManager().settings
+        repo.data[RepoKeys.PRODUCT_REMAINS] = TurnoverBalanceSheet.calculate_remains(new_block_date, all_transactions, all_products, sett.block_date, repo.get_values(RepoKeys.PRODUCT_REMAINS))
+        sett.block_date = new_block_date
 
