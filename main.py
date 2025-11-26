@@ -26,7 +26,8 @@ settings_manager = SettingsManager()
 settings = settings_manager.settings
 
 app = connexion.FlaskApp(__name__)
-app.add_api('swagger.yaml', base_path='/api')
+# todo fix swagger
+# app.add_api('swagger.yaml', base_path='/api')
 # Ссылка на документацию
 # http://127.0.0.1:8080/api/ui/
 

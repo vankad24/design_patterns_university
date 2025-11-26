@@ -166,6 +166,18 @@ paths:
           description: JSON со всеми данными репозитория
           schema:
             type: object
+    post:
+      tags:
+        - Хранилище
+      summary: Получить все данные из Repository в формате JSON
+      operationId: main.get_all_from_repository
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: JSON со всеми данными репозитория
+          schema:
+            type: object
 
   /save_all:
     post:
@@ -184,3 +196,134 @@ paths:
                 status:
                   type: string
                   example: ok
+
+  /tbs-filter:
+    post:
+      tags:
+        - Отчеты
+      summary: Оборотно-сальдовая ведомость (Turnover balance sheet) с фильтрацией через тело запроса
+      operationId: main.get_tbs_filter
+      consumes:
+        - application/json
+      parameters:
+        - name: FilterTbsDto
+          in: body
+          description: Объект с параметрами фильтрации, включая start_date и end_date (формат YYYY-MM-DD)
+          required: true
+          schema:
+            type: object # Заглушка для FilterTbsDto
+      responses:
+        '200':
+          description: Результат расчета оборотно-сальдовой ведомости
+          schema:
+            type: array
+            items:
+              type: object # Заглушка для TurnoverItem
+        '400':
+          description: Ошибка в переданных аргументах или логике дат
+
+  /models-filter:
+    post:
+      tags:
+        - Хранилище
+      summary: Получить модели данных и отфильтровать/отсортировать их
+      operationId: main.get_models_filter
+      consumes:
+        - application/json
+      parameters:
+        - name: FilterModelsDto
+          in: body
+          description: Объект с моделью, фильтрами и сортировкой
+          required: true
+          schema:
+            type: object # Заглушка для FilterModelsDto
+      responses:
+        '200':
+          description: Отфильтрованные и отсортированные данные
+          schema:
+            type: array
+            items:
+              type: object
+        '400':
+          description: Ошибка неверного аргумента
+
+  /set-block-date:
+    post:
+      tags:
+        - Управление
+      summary: Меняет дату блокировки ОСВ
+      operationId: main.set_block_date_route
+      consumes:
+        - application/json
+      parameters:
+        - name: new_block_date_body
+          in: body
+          description: Новая дата блокировки (формат YYYY-MM-DD)
+          required: true
+          schema:
+            type: object
+            properties:
+              new_block_date:
+                type: string
+                format: date
+                example: 2025-01-01
+      responses:
+        '200':
+          description: Дата блокировки успешно изменена
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                message:
+                  type: string
+                new_date:
+                  type: string
+                  format: date-time
+        '400':
+          description: Ошибка в переданных аргументах или при изменении даты
+
+  /get-block-date:
+    get:
+      tags:
+        - Управление
+      summary: Возвращает текущую дату блокировки
+      operationId: main.get_block_date_route
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Текущая дата блокировки
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                block_date:
+                  type: string
+                  format: date-time
+        '400':
+          description: Ошибка при получении даты блокировки
+
+  /get-product-remains:
+    get:
+      tags:
+        - Отчеты
+      summary: Возвращает остатки товаров на указанную дату
+      operationId: main.get_product_remains_route
+      parameters:
+        - name: target_date
+          in: query
+          description: Дата, на которую нужно рассчитать остатки (формат YYYY-MM-DD)
+          required: true
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Список остатков товаров
+          schema:
+            type: array
+            items:
+              type: object # Заглушка для ProductRemainsItem
+        '400':
+          description: Ошибка в переданных аргументах или при расчете остатков
