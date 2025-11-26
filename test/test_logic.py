@@ -214,7 +214,7 @@ def test_tbs_calculation_with_product_remains(storage_a, product_a, product_b, b
 
 
 
-def test_tbs_calculation_with_block_date_and_transactions(storage_a, product_a, base_unit, all_products):
+def test_tbs_calculation_with_block_date_and_transactions(storage_a, product_a, storage_b, base_unit, all_products):
     """
     Проверяет расчет сальдо, когда задана `block_date`.
     """
@@ -225,10 +225,12 @@ def test_tbs_calculation_with_block_date_and_transactions(storage_a, product_a, 
     all_transactions = [
         # Транзакции в закрытом периоде до BLOCK_DATE (добавляются в начальное сальдо)
         TransactionModel.create(datetime(2024, 1, 5), 50.0, base_unit, product_a, storage_a),
+        TransactionModel.create(datetime(2024, 1, 13), 40.0, base_unit, product_a, storage_b),
         TransactionModel.create(datetime(2024, 1, 14), -20.0, base_unit, product_a, storage_a),
 
         # Транзакции в ОТКРЫТОМ периоде (BLOCK_DATE <= date <= END_DATE)
         TransactionModel.create(datetime(2024, 1, 16), 10.0, base_unit, product_a, storage_a),  # Приход
+        TransactionModel.create(datetime(2024, 1, 17), 10.0, base_unit, product_a, storage_b),  # Приход
         TransactionModel.create(datetime(2024, 1, 25), -5.0, base_unit, product_a, storage_a),  # Расход
     ]
 

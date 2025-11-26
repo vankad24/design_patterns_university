@@ -23,6 +23,7 @@ from src.start_service import StartService
 start_service = StartService()
 repository = Repository()
 settings_manager = SettingsManager()
+settings_manager.load()
 settings = settings_manager.settings
 
 app = connexion.FlaskApp(__name__)
