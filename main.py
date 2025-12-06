@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import connexion
 from flask import request
 
@@ -21,9 +23,12 @@ from src.start_service import StartService
 start_service = StartService()
 repository = Repository()
 settings_manager = SettingsManager()
+settings_manager.load()
+settings = settings_manager.settings
 
 app = connexion.FlaskApp(__name__)
-app.add_api('swagger.yaml', base_path='/api')
+# todo fix swagger
+# app.add_api('swagger.yaml', base_path='/api')
 # Ссылка на документацию
 # http://127.0.0.1:8080/api/ui/
 
@@ -105,17 +110,23 @@ def get_tbs(storage_id: str):
     if storage is None:
         return ErrorResponse.build(f"Склад с id:'{storage_id}' не найден")
 
-    dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage)],
-                       start_date=request.args.get('start_date'), end_date=request.args.get('end_date'))
+    try:
+        dto = FilterTbsDto(transaction_filters=[FilterDto(field_name="storage", value=storage)])
 
-    if dto.start_date >= dto.end_date:
+        start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    if start_date >= end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
     try:
         items = TurnoverBalanceSheet.calculate(
             repository.get_values(RepoKeys.TRANSACTIONS),
             repository.data[RepoKeys.PRODUCTS],
-            dto)
+            dto, start_date, end_date, settings.block_date,
+            repository.get_values(RepoKeys.PRODUCT_REMAINS))
     except Exception as e:
         return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
 
@@ -146,17 +157,20 @@ def get_tbs_filter():
     """
     try:
         dto: FilterTbsDto = create_dto(FilterTbsDto, request.get_json())
+        start_date = datetime.strptime(dto.start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(dto.end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
     except Exception as e:
         return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
 
-    if dto.start_date >= dto.end_date:
+    if start_date >= end_date:
         return ErrorResponse.build(f"Конечная дата не может быть раньше начальной")
 
     try:
         items = TurnoverBalanceSheet.calculate(
             repository.get_values(RepoKeys.TRANSACTIONS),
             repository.data[RepoKeys.PRODUCTS],
-            dto)
+            dto, start_date, end_date, settings.block_date,
+            repository.get_values(RepoKeys.PRODUCT_REMAINS))
     except Exception as e:
         return ErrorResponse.build(f"Ошибка во время обработки данных: {e}")
 
@@ -178,6 +192,62 @@ def get_models_filter():
 
     models = Prototype(repository.get_values(model)).filter_mul(dto.filters).sort(dto.sorts).data
     return FactoryEntities().create(ResponseFormat.JSON).build(models)
+
+@app.route("/api/set-block-date", methods=['POST'])
+def set_block_date_route():
+    """
+    Меняет дату блокировки ОСВ.
+    """
+    try:
+        data = request.get_json()
+        new_block_date = datetime.strptime(data['new_block_date'], '%Y-%m-%d')
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    try:
+        TurnoverBalanceSheet.change_block_date(
+            new_block_date,
+            repository.get_values(RepoKeys.TRANSACTIONS),
+            repository.data[RepoKeys.PRODUCTS],
+        )
+        return FactoryEntities().create(ResponseFormat.JSON).build([{"message": "Дата блокировки успешно изменена", "new_date": new_block_date.isoformat()}])
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка при изменении даты блокировки: {e}")
+
+
+@app.route("/api/get-block-date", methods=['GET'])
+def get_block_date_route():
+    """
+    Возвращает текущую дату блокировки.
+    """
+    try:
+        return FactoryEntities().create(ResponseFormat.JSON).build([{"block_date":  SettingsManager().settings.block_date }])
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка при получении даты блокировки: {e}")
+
+
+@app.route("/api/get-product-remains", methods=['GET'])
+def get_product_remains_route():
+    """
+    Возвращает остатки товаров на указанную дату.
+    """
+    try:
+        target_date = datetime.strptime(request.args.get('target_date'), '%Y-%m-%d')
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    try:
+        remains_data = TurnoverBalanceSheet.calculate_remains(
+            target_date,
+            repository.get_values(RepoKeys.TRANSACTIONS),
+            repository.data[RepoKeys.PRODUCTS],
+            settings.block_date,
+            repository.get_values(RepoKeys.PRODUCT_REMAINS),
+            True
+        )
+        return FactoryEntities().create(ResponseFormat.JSON).build(remains_data)
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка при расчете остатков: {e}")
 
 
 if __name__ == '__main__':

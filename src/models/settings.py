@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.dto.settings_dto import SettingsDto
 from src.logics.responses.response_format import ResponseFormat
 from src.models.abstract_model import AbstractModel
@@ -15,6 +17,7 @@ class SettingsModel(AbstractModel):
     _company: CompanyModel = None
     _default_response_format: ResponseFormat = ResponseFormat.JSON
     _first_start: bool = True
+    _block_date: datetime = None
 
     def __init__(self):
         super().__init__()
@@ -49,6 +52,16 @@ class SettingsModel(AbstractModel):
     def first_start(self, value: bool):
         self._first_start = value
 
+    # Дата конца закрытой ведомости, начала открытой
+    @property
+    def block_date(self) -> datetime:
+        return self._block_date
+
+    @block_date.setter
+    @validate_setter(datetime)
+    def block_date(self, value: datetime):
+        self._block_date = value
+
     @staticmethod
     def from_dto(dto: SettingsDto, cache: dict):
         """
@@ -59,6 +72,7 @@ class SettingsModel(AbstractModel):
         item.company = CompanyModel.from_dto(dto.company, cache)
         item.default_response_format = ResponseFormat(dto.default_response_format)
         item.first_start = dto.first_start
+        item.block_date = datetime.strptime(dto.block_date, "%Y-%m-%d")
 
         return item
 
@@ -70,5 +84,6 @@ class SettingsModel(AbstractModel):
             self._id,
             self._company.to_dto(),
             self._default_response_format,
-            self._first_start
+            self._first_start,
+            self._block_date.strftime("%Y-%m-%d"),
         )

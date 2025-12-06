@@ -2,6 +2,7 @@ from dataclasses import asdict
 from enum import StrEnum
 
 from src.core.singletone import Singleton
+from src.models.abstract_model import AbstractModel
 
 
 class RepoKeys(StrEnum):
@@ -16,6 +17,7 @@ class RepoKeys(StrEnum):
     RECIPES = "recipes"
     STORAGES = "storages"
     TRANSACTIONS = "transactions"
+    PRODUCT_REMAINS = "product_remains"
 
 
 class Repository(metaclass=Singleton):
@@ -25,7 +27,7 @@ class Repository(metaclass=Singleton):
 
     __data: внутренний словарь вида {key: {id: объект}}, где key берется из RepoKeys
     """
-    __data: dict = None
+    __data: dict[str, dict] = None
 
     # ключ для сохранения в конфиг
     CONFIG_KEY = 'models'
