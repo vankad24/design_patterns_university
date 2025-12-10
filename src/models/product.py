@@ -1,9 +1,11 @@
+from src.core.observer.event_models import DeleteModelEvent
 from src.dto.cached_id import CachedId
 from src.dto.product_dto import ProductDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product_group import ProductGroupModel
 from src.models.validators.decorators import validate_setter
+from src.models.validators.exceptions import OperationException
 
 
 ###############################################
@@ -111,4 +113,15 @@ class ProductModel(AbstractModel):
                           self._full_name,
                           self._unit and CachedId(self._unit.id),
                           self._group and CachedId(self._group.id))
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        """
+          Обработчик при удалении модели
+        """
+        if (self.unit is not None and self.unit == event.model) or \
+                (self.group is not None and self.group == event.model):
+            raise OperationException(
+                f"Нельзя удалить объект `{event.model}`, он используется в {self}"
+            )
+        return False
 

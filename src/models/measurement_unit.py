@@ -1,7 +1,9 @@
+from src.core.observer.event_models import DeleteModelEvent
 from src.dto.cached_id import CachedId
 from src.dto.measurement_dto import MeasurementUnitDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
+from src.models.validators.exceptions import OperationException
 from src.models.validators.functions import not_empty, validate_val
 
 
@@ -98,3 +100,15 @@ class MeasurementUnitModel(AbstractModel):
             # Заменяем вложенную модель _base_unit на CachedId(id), если она существует
             self._base_unit and CachedId(self._base_unit.id)
         )
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        """
+          Обработчик при удалении модели
+        """
+        # Нельзя удалить единицу, если она является базовой для другой
+        if event.model == self.base_unit:
+            raise OperationException(
+                f"Нельзя удалить объект `{event.model}`, он используется как базовая единица для {self}"
+            )
+
+        return False

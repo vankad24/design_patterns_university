@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from src.core.logger.mylogger import MyLogger
 from src.dto.settings_dto import SettingsDto
 from src.logics.responses.response_format import ResponseFormat
 from src.models.abstract_model import AbstractModel
@@ -18,6 +19,7 @@ class SettingsModel(AbstractModel):
     _default_response_format: ResponseFormat = ResponseFormat.JSON
     _first_start: bool = True
     _block_date: datetime = None
+    _logger: MyLogger = MyLogger()
 
     def __init__(self):
         super().__init__()
@@ -73,6 +75,8 @@ class SettingsModel(AbstractModel):
         item.default_response_format = ResponseFormat(dto.default_response_format)
         item.first_start = dto.first_start
         item.block_date = datetime.strptime(dto.block_date, "%Y-%m-%d")
+        item._logger = MyLogger.from_dto(dto.logger, cache)
+
 
         return item
 
@@ -86,4 +90,5 @@ class SettingsModel(AbstractModel):
             self._default_response_format,
             self._first_start,
             self._block_date.strftime("%Y-%m-%d"),
+            self._logger.to_dto(),
         )
