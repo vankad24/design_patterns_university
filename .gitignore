@@ -182,3 +182,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 temp_main.py
+/logs
