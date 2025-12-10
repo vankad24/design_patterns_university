@@ -4,6 +4,7 @@ import connexion
 from flask import request
 
 from src.core.functions import dump_json
+from src.core.logger.mylogger import MyLogger
 from src.core.prototype import Prototype
 from src.dto.filter_dto import FilterDto
 from src.dto.filter_models_dto import FilterModelsDto
@@ -16,15 +17,19 @@ from src.logics.responses.error_response import ErrorResponse
 from src.logics.responses.json_response import JsonResponse
 from src.logics.responses.response_format import ResponseFormat
 from src.logics.turnover_balance_sheet import TurnoverBalanceSheet
+from src.model_manager import ModelManager
 from src.repository import RepoKeys, Repository
 from src.settings_manager import SettingsManager
 from src.start_service import StartService
 
-start_service = StartService()
-repository = Repository()
+
 settings_manager = SettingsManager()
 settings_manager.load()
 settings = settings_manager.settings
+logger = MyLogger()
+start_service = StartService()
+repository = Repository()
+
 
 app = connexion.FlaskApp(__name__)
 # todo fix swagger
@@ -248,6 +253,27 @@ def get_product_remains_route():
         return FactoryEntities().create(ResponseFormat.JSON).build(remains_data)
     except Exception as e:
         return ErrorResponse.build(f"Ошибка при расчете остатков: {e}")
+
+@app.route("/api/delete/model", methods=['POST'])
+def delete_model_by_id():
+    """
+    Удаляет модель по id
+    """
+    try:
+        data = request.get_json()
+        model_id = data['id']
+    except Exception as e:
+        return ErrorResponse.build(f"Ошибка в переданных аргументах: {e}")
+
+    all_models = repository.get_all_models()
+    if model_id not in all_models:
+        return ErrorResponse.build(f"Модель с id `{model_id}` не найдена")
+
+    result = ModelManager.delete_model(model_id)
+    if result:
+        return FactoryEntities().create(ResponseFormat.JSON).build([{"message": f"Модель с id `{model_id}` успешно удалена"}])
+    else:
+        return ErrorResponse.build(f"Модель с id `{model_id}` не была удалена")
 
 
 if __name__ == '__main__':
