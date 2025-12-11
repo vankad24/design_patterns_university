@@ -7,9 +7,9 @@ RUN pip install connexion[swagger-ui]
 RUN pip install connexion[flask]
 RUN pip install connexion[uvicorn]
 
-COPY ./Src /app/Src
+COPY ./src /app/src
 COPY ./main.py /app/main.py
-# COPY ./swagger.yaml /app/swagger.yaml
+COPY ./swagger.yaml /app/swagger.yaml
 
 # Точка запуска
 CMD ["python", "main.py"]
