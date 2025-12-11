@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  # Основной сервис
+  study2025_8001:
+    container_name: study_2025_8001
+    image: study_2025:1.0
+    ports:
+      - 8001:8080
+    volumes:
+      - ./dump.json:/app/dump.json
+      - ./settings.json:/app/settings.json
+
+  study2025_8002:
+    container_name: study_2025_8002
+    image: study_2025:1.0
+    ports:
+      - 8002:8080
+    volumes:
+      - ./dump.json:/app/dump.json
+      - ./settings.json:/app/settings.json
+
+
+networks:
+  default:
