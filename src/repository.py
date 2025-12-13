@@ -2,7 +2,6 @@ from dataclasses import asdict
 from enum import StrEnum
 
 from src.core.singletone import Singleton
-from src.models.abstract_model import AbstractModel
 
 
 class RepoKeys(StrEnum):
@@ -54,6 +53,12 @@ class Repository(metaclass=Singleton):
             Получить список всех значений по ключу из репозитория
         """
         return list(self.data[key].values())
+
+    def get_all_models(self) -> dict:
+        r = {}
+        for key, models in self.__data.items():
+            r.update(models)
+        return r
 
     def dump(self) -> dict:
         """

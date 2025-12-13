@@ -1,6 +1,7 @@
 import uuid
 from abc import ABC
 
+from src.core.observer.event_models import DeleteModelEvent, AddModelEvent, ChangeModelEvent
 from src.dto.abstract_dto import AbstractDto
 from src.models.validators.decorators import validate_setter
 
@@ -49,4 +50,14 @@ class AbstractModel(ABC):
 
     # Отдельный общий метод для формирования Dto структуры
     def to_dto(self):
+        pass
+
+    # Методы для обработки наблюдателем
+    def on_add(self, event: AddModelEvent) -> bool:
+        pass
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        pass
+
+    def on_change(self, event: ChangeModelEvent) -> bool:
         pass

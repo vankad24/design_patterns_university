@@ -1,6 +1,8 @@
+from src.core.observer.event_models import DeleteModelEvent
 from src.dto.product_group_dto import ProductGroupDto
 from src.models.abstract_model import AbstractModel
 from src.models.validators.decorators import validate_setter
+from src.models.validators.exceptions import OperationException
 from src.models.validators.functions import not_empty
 
 
@@ -55,3 +57,13 @@ class ProductGroupModel(AbstractModel):
             self._id,
             self._name
         )
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        """
+          Обработчик при удалении модели
+        """
+        if self == event.model:
+            raise OperationException(
+                f"Нельзя удалить объект `{event.model}`, он используется в {self}"
+            )
+        return False

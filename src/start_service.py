@@ -1,8 +1,12 @@
 from src.core.functions import load_json
+from src.core.logger.log_level import LogLevel
+from src.core.logger.mylogger import MyLogger
+from src.core.observer.event_type import EventType
+from src.core.observer.observer_service import ObserverService
 from src.core.singletone import Singleton
 from src.dto.abstract_dto import AbstractDto
 from src.dto.functions import create_dto
-from src.models.abstract_model import AbstractModel
+from src.model_manager import ModelManager
 from src.models.ingridient import IngredientModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
@@ -45,6 +49,8 @@ class StartService(metaclass=Singleton):
         for key in RepoKeys:
             self.__cached_models[str(key)] = {}
 
+        self.init_observers()
+
         settings = SettingsManager().settings
         if settings.first_start:
             self.start()
@@ -59,6 +65,13 @@ class StartService(metaclass=Singleton):
         """
         return self.__repo
 
+    @property
+    def cached_models(self):
+        """
+        Возвращает словарь кэшированных моделей.
+        """
+        return self.__cached_models
+
     def create_models_from_loaded(self, key: RepoKeys, model_type, dto_type):
         """
         Создаёт модели заданного типа из ранее загруженных данных JSON
@@ -72,9 +85,8 @@ class StartService(metaclass=Singleton):
             dto: AbstractDto = create_dto(dto_type, data)
             if dto.id in self.__cached_models:
                 continue
-            model: AbstractModel = model_type.from_dto(dto, self.__cached_models)
+            model = ModelManager.add_model(key, model_type, dto, self.__cached_models)
             self.__cached_models[model.id] = model
-            self.repo.data[key][model.id] = model
 
     def load(self, filepath):
         """
@@ -106,3 +118,12 @@ class StartService(metaclass=Singleton):
 
         for repo_key, model_class in entities_to_load:
             self.create_models_from_loaded(repo_key, model_class, model_class.DTO_CLASS)
+
+    def init_observers(self):
+        logger = MyLogger()
+        observer = ObserverService()
+        observer.add(EventType.MODEL_ADD, lambda e: logger.log(LogLevel.INFO, f"Добавление модели: {e.model}"))
+        observer.add(EventType.MODEL_DELETE, lambda e: logger.log(LogLevel.INFO, f"Удаление модели: {e.model}"))
+        observer.add(EventType.MODEL_CHANGE, lambda e: logger.log(LogLevel.INFO, f"Изменение модели: {e.model}"))
+        observer.add(EventType.MODEL_OPERATION_ERROR, lambda e: logger.log(LogLevel.WARN, e.msg))
+        observer.add(EventType.MODEL_OPERATION_SUCCESS, lambda e: logger.log(LogLevel.INFO, e.msg))

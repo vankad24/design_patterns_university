@@ -1,8 +1,10 @@
+from src.core.observer.event_models import DeleteModelEvent
 from src.dto.cached_id import CachedId
 from src.dto.recipe_dto import RecipeDto
 from src.models.abstract_model import AbstractModel
 from src.models.ingridient import IngredientModel
 from src.models.validators.decorators import validate_setter
+from src.models.validators.exceptions import OperationException
 from src.models.validators.functions import validate_val, not_empty
 
 
@@ -121,3 +123,13 @@ class RecipeModel(AbstractModel):
             self._steps,
             ingredients_dto
         )
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        """
+          Обработчик при удалении модели
+        """
+        if any(ing == event.model for ing in self._ingredients):
+            raise OperationException(
+                f"Нельзя удалить объект `{event.model}`, он используется в {self}"
+            )
+        return False

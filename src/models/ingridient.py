@@ -1,9 +1,11 @@
+from src.core.observer.event_models import DeleteModelEvent
 from src.dto.cached_id import CachedId
 from src.dto.ingridient_dto import IngredientDto
 from src.models.abstract_model import AbstractModel
 from src.models.measurement_unit import MeasurementUnitModel
 from src.models.product import ProductModel
 from src.models.validators.decorators import validate_setter
+from src.models.validators.exceptions import OperationException
 
 
 ###############################################
@@ -96,3 +98,12 @@ class IngredientModel(AbstractModel):
             # Заменяем вложенную модель _unit на CachedId(id)
             self._unit and CachedId(self._unit.id)
         )
+
+    def on_delete(self, event: DeleteModelEvent) -> bool:
+        """
+          Обработчик при удалении модели
+        """
+        if self.unit is not None and self.unit == event.model or \
+                self.product is not None and self.product == event.model:
+            raise OperationException(f"Нельзя удалить объект `{event.model}`, он используется в {self}")
+        return False
